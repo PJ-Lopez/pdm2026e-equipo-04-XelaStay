@@ -1,19 +1,86 @@
 # pdm2026e-equipo-04-gymtrack
-# GymTrack
+# GymTrack 
 
-## Problema
-Las personas que entrenan en el gimnasio suelen olvidar las cargas y repeticiones de sesiones pasadas, anotan de forma desordenada en blocs de notas y alargan los descansos por distracción con el móvil.
+> Aplicación móvil construida en Flutter para el registro ágil de entrenamientos de pesas, control de sobrecarga progresiva y temporización de descansos guiados.
 
-## Alcance MVP (M1)
-1. Selector de 3 rutinas fijas (Empuje, Tracción, Pierna).
-2. Registro ágil de peso (kg/lbs) y repeticiones por serie.
-3. Temporizador de descanso configurable (60s/90s) con resumen de volumen al finalizar.
+---
 
-## Integrantes y Roles
-- *Producto / PM:* @Emersonx257 - Emerson Basilio Tahay Menchú - 202308012 - Alcance y criterios de aceptación.
-- *Arquitectura:* @PJ-Lopez - Pedro Javier López López - 202308038 - Repositorio, ramas y arquitectura Flutter.
-- *UX / Investigación:* @joshuaF14 - Joshua David Flores Morales - 202308056 - Flujo de interfaz y validación con usuarios.
-- *QA / Release:* @gio-ld - Giovanni Fernando de León Coyoy - 202308088 - Revisión de PRs, pruebas de criterios y merge.
+## 1. Problema Observable
+Las personas que entrenan fuerza o hipertrofia en salas de pesas suelen olvidar las cargas y repeticiones ejecutadas en sesiones anteriores, recurren a blocs de notas desestructurados que generan fricción durante el entrenamiento y extienden innecesariamente sus descansos por distracción con el teléfono móvil.
 
-## Regla de Trabajo
-Nadie hace push directo a main: issue -> rama -> PR -> revisión -> merge.
+---
+
+## 2. Alcance del MVP (Milestone M1: Arquitectura y Datos)
+1. **Catálogo de Rutinas Base:** Selector de 3 rutinas fijas predeterminadas (Empuje, Tracción, Pierna).
+2. **Registro de Series Interactivo:** Entrada rápida de peso (kg/lbs) y repeticiones con validación de serie completada.
+3. **Temporizador de Descanso:** Contador regresivo configurable (60s / 90s / 120s) con alerta de descanso finalizado y pantalla de resumen con volumen total levantado.
+
+---
+
+## 3. Integrantes del Equipo
+
+* **Emerson Basilio Tahay Menchú** — Carnet: `202308012` — [@Emersonx257](https://github.com/Emersonx257)
+* **Pedro Javier López López** — Carnet: `202308038` — [@PJ-Lopez](https://github.com/PJ-Lopez)
+* **Joshua David Flores Morales** — Carnet: `202308056` — [@joshuaF14](https://github.com/joshuaF14)
+* **Giovanni Fernando de León Coyoy** — Carnet: `202308088` — [@gio-ld](https://github.com/gio-ld)
+
+---
+
+## 4. Historial y Matriz de Roles Semanales
+
+De acuerdo con la metodología de trabajo del curso, los roles rotan periódicamente asegurando que todos los integrantes participen en la toma de decisiones, arquitectura, diseño y control de calidad:
+
+### Semana 1 (Laboratorio S08 — Definición, Setup y Backlog M1)
+| Integrante | Rol Semana 1 | Responsabilidad Desempeñada |
+| :--- | :--- | :--- |
+| `@Emersonx257` | **Producto / PM** | Definición del alcance del MVP, delimitación de funciones y redacción de criterios de aceptación. |
+| `@PJ-Lopez` | **Arquitectura** | Creación y configuración inicial del repositorio, ramas base y archivo `.gitignore`. |
+| `@joshuaF14` | **UX / Investigación** | Mapeo del flujo principal de 3 pasos y validación de la experiencia en sala de pesas. |
+| `@gio-ld` | **QA / Release** | Configuración de reglas de protección en `main`, revisión del primer Pull Request y merge inicial. |
+
+### Semana 2 (Semana Actual — Implementación M1: Arquitectura y Modelos)
+| Integrante | Rol Semana 2 | Responsabilidad y Entregables |
+| :--- | :--- | :--- |
+| `@PJ-Lopez` | **Producto / PM** | Priorización y refinamiento de issues en Milestone M1; auditoría de criterios de aceptación. |
+| `@joshuaF14` | **Arquitectura** | Definición del estándar de Clean Architecture y creación de modelos de datos Dart (`Routine`, `Exercise`, `WorkoutSet`). |
+| `@gio-ld` | **UX / Investigación** | Maquetación del flujo de navegación entre pantallas y validación del catálogo de rutinas. |
+| `@Emersonx257` | **QA / Release** | Revisión de Pull Requests, ejecución de checklist de pruebas y control de merges hacia `main`. |
+
+---
+
+## 5. Arquitectura de Software: Clean Architecture
+
+El proyecto organiza su código fuente bajo una estructura modular en capas para desacoplar la interfaz de usuario de las reglas de negocio y fuentes de datos:
+
+lib/
+├── main.dart                          # Punto de entrada y configuración global
+│
+├── core/                              # Recursos globales compartidos
+│   ├── theme/                         # Paleta de colores, tipografías y ThemeData
+│   └── utils/                         # Helpers y formateadores de tiempo
+│
+└── features/                          # Módulos funcionales
+    └── workout/                       # Feature principal de entrenamiento
+        ├── domain/                    # Reglas de negocio puras (sin Flutter UI)
+        │   ├── entities/              # Entidades: Routine, Exercise, WorkoutSet
+        │   └── repositories/          # Contratos e interfaces de repositorios
+        │
+        ├── data/                      # Persistencia y fuentes de datos
+        │   ├── datasources/           # Catálogo local y almacenamiento de series
+        │   ├── models/                # Modelos con serialización (toMap / fromMap)
+        │   └── repositories/          # Implementación concreta de los repositorios
+        │
+        └── presentation/              # Capa visual e interactiva
+            ├── controllers/           # Gestores de estado (temporizador y sesión)
+            ├── pages/                 # Pantallas: SelectorRutinasPage, TrainingPage, SummaryPage
+            └── widgets/               # Componentes reutilizables (SetRowTile, TimerCard)
+
+---
+
+## 6. Regla de Trabajo y Flujo Git
+
+>  **Regla estricta:** Nadie hace push directo a `main`. Todo cambio en el proyecto debe pasar por revisión antes de integrarse.
+
+El ciclo de desarrollo obligatorio es:
+
+[Issue asignado en M1] ──> [Rama local: issue-<#>-descripcion] ──> [Pull Request con 'Closes #<#>'] ──> [Revisión y Aprobación QA] ──> [Merge a main]
