@@ -52,28 +52,30 @@ De acuerdo con la metodología de trabajo del curso, los roles rotan periódicam
 
 El proyecto organiza su código fuente bajo una estructura modular en capas para desacoplar la interfaz de usuario de las reglas de negocio y fuentes de datos:
 
+```text
 lib/
-├── main.dart                          # Punto de entrada y configuración global
+├── main.dart                          # Punto de entrada y arranque
 │
 ├── core/                              # Recursos globales compartidos
-│   ├── theme/                         # Paleta de colores, tipografías y ThemeData
-│   └── utils/                         # Helpers y formateadores de tiempo
+│   ├── theme/                         # Paleta de colores y ThemeData
+│   └── utils/                         # Formateadores y helpers
 │
 └── features/                          # Módulos funcionales
     └── workout/                       # Feature principal de entrenamiento
-        ├── domain/                    # Reglas de negocio puras (sin Flutter UI)
-        │   ├── entities/              # Entidades: Routine, Exercise, WorkoutSet
-        │   └── repositories/          # Contratos e interfaces de repositorios
+        ├── domain/                    # Lógica pura (sin dependencias de UI)
+        │   ├── entities/              # Routine, Exercise, WorkoutSet
+        │   └── repositories/          # Contratos e interfaces abstractas
         │
-        ├── data/                      # Persistencia y fuentes de datos
-        │   ├── datasources/           # Catálogo local y almacenamiento de series
-        │   ├── models/                # Modelos con serialización (toMap / fromMap)
-        │   └── repositories/          # Implementación concreta de los repositorios
+        ├── data/                      # Persistencia e implementación
+        │   ├── datasources/           # Catálogo local / persistencia
+        │   ├── models/                # Modelos y serialización
+        │   └── repositories/          # Implementación de los repositorios
         │
-        └── presentation/              # Capa visual e interactiva
-            ├── controllers/           # Gestores de estado (temporizador y sesión)
-            ├── pages/                 # Pantallas: SelectorRutinasPage, TrainingPage, SummaryPage
-            └── widgets/               # Componentes reutilizables (SetRowTile, TimerCard)
+        └── presentation/              # Capa visual y estado
+            ├── controllers/           # Gestores de estado y timer
+            ├── pages/                 # RutinasPage, TrainingPage, SummaryPage
+            └── widgets/               # SetRowTile, TimerCard, etc.
+```
 
 ---
 
