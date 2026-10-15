@@ -9,7 +9,7 @@ import 'features/hosts/domain/usecases/create_host_stay.dart';
 import 'features/hosts/presentation/pages/create_host_stay_page.dart';
 import 'features/hosts/presentation/pages/host_dashboard_page.dart';
 import 'features/stays/domain/usecases/get_public_stays.dart';
-import 'features/stays/presentation/pages/home_screen.dart';
+import 'features/stays/presentation/pages/stays_page.dart';
 
 class XelaStayApp extends StatefulWidget {
   const XelaStayApp({
@@ -126,7 +126,7 @@ class _GuestAppShellState extends State<_GuestAppShell> {
     body: IndexedStack(
       index: _selectedIndex,
       children: [
-        HomeScreen(
+        StaysPage(
           user: widget.user,
           getPublicStays: widget.getPublicStays,
           onOpenProfile: () => setState(() => _selectedIndex = 1),
