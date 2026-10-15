@@ -65,12 +65,13 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<AppUser> becomeHost() async {
     final token = await local.readToken();
-    if (token == null)
+    if (token == null) {
       throw const ApiException(
         statusCode: 401,
         code: 'SESSION_REQUIRED',
         message: 'Inicia sesión para activar tu perfil de anfitrión.',
       );
+    }
     final response = await remote.becomeHost(token);
     final userJson = response['user'];
     if (userJson is! Map<String, dynamic>) {
@@ -79,8 +80,9 @@ class AuthRepositoryImpl implements AuthRepository {
       );
     }
     final newToken = response['token']?.toString();
-    if (newToken != null && newToken.isNotEmpty)
+    if (newToken != null && newToken.isNotEmpty) {
       await local.saveToken(newToken);
+    }
     return AppUserModel.fromJson(userJson);
   }
 

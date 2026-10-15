@@ -128,7 +128,7 @@ class _CreateHostStayPageState extends State<CreateHostStayPage> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              value: _propertyType,
+              initialValue: _propertyType,
               decoration: const InputDecoration(labelText: 'Tipo de espacio'),
               items: const [
                 DropdownMenuItem(
@@ -314,8 +314,9 @@ class _CreateHostStayPageState extends State<CreateHostStayPage> {
     ),
     validator: (value) {
       final parsed = double.tryParse((value ?? '').replaceAll(',', '.'));
-      if (parsed == null || parsed < min || parsed > max)
+      if (parsed == null || parsed < min || parsed > max) {
         return 'Coordenada inválida';
+      }
       return null;
     },
     decoration: InputDecoration(labelText: label),
