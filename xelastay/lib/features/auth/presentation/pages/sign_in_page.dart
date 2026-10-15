@@ -131,8 +131,8 @@ class _SignInPageState extends State<SignInPage> {
                               if (value == null || value.isEmpty) {
                                 return 'Escribe tu contraseña';
                               }
-                              if (_isRegistering && value.length < 6) {
-                                return 'Usa al menos 6 caracteres';
+                              if (_isRegistering && value.length < 8) {
+                                return 'Usa al menos 8 caracteres';
                               }
                               return null;
                             },
@@ -156,7 +156,9 @@ class _SignInPageState extends State<SignInPage> {
                           ),
                           if (widget.controller.errorMessage != null) ...[
                             const SizedBox(height: 14),
-                            _ErrorBanner(message: widget.controller.errorMessage!),
+                            _ErrorBanner(
+                              message: widget.controller.errorMessage!,
+                            ),
                           ],
                           const SizedBox(height: 20),
                           FilledButton(
@@ -226,8 +228,9 @@ class _SignInPageState extends State<SignInPage> {
     decoration: InputDecoration(labelText: label, prefixIcon: Icon(icon)),
   );
 
-  String? _required(String? value) =>
-      value == null || value.trim().isEmpty ? 'Este campo es obligatorio' : null;
+  String? _required(String? value) => value == null || value.trim().isEmpty
+      ? 'Este campo es obligatorio'
+      : null;
 
   String? _emailValidator(String? value) {
     final email = value?.trim() ?? '';
@@ -283,13 +286,21 @@ class _ErrorBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.all(12),
-    decoration: BoxDecoration(color: const Color(0xFFF8E9EA), borderRadius: BorderRadius.circular(12)),
+    decoration: BoxDecoration(
+      color: const Color(0xFFF8E9EA),
+      borderRadius: BorderRadius.circular(12),
+    ),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Icon(Icons.info_outline, color: AppColors.red, size: 19),
         const SizedBox(width: 8),
-        Expanded(child: Text(message, style: const TextStyle(color: AppColors.ink, height: 1.35))),
+        Expanded(
+          child: Text(
+            message,
+            style: const TextStyle(color: AppColors.ink, height: 1.35),
+          ),
+        ),
       ],
     ),
   );

@@ -68,8 +68,9 @@ class ApiClient {
       final streamedResponse = await _client
           .send(request)
           .timeout(const Duration(seconds: 15));
-      final response = await http.Response.fromStream(streamedResponse)
-          .timeout(const Duration(seconds: 20));
+      final response = await http.Response.fromStream(
+        streamedResponse,
+      ).timeout(const Duration(seconds: 20));
       final decoded = response.body.isEmpty
           ? <String, dynamic>{}
           : jsonDecode(response.body) as Map<String, dynamic>;
@@ -107,7 +108,8 @@ class ApiClient {
       throw const ApiException(
         statusCode: 0,
         code: 'NETWORK_UNAVAILABLE',
-        message: 'No pudimos conectar. Revisa tu conexión e inténtalo de nuevo.',
+        message:
+            'No pudimos conectar. Revisa tu conexión e inténtalo de nuevo.',
       );
     } on FormatException {
       throw const ApiException(

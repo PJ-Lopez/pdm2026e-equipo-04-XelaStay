@@ -10,16 +10,12 @@ import '../../domain/usecases/sign_out.dart';
 
 class AuthController extends ChangeNotifier {
   AuthController({
-    required SignIn signIn,
-    required RegisterAccount register,
-    required RestoreSession restoreSession,
-    required BecomeHost becomeHost,
-    required SignOut signOut,
-  }) : _signIn = signIn,
-       _register = register,
-       _restoreSession = restoreSession,
-       _becomeHost = becomeHost,
-       _signOut = signOut;
+    required this._signIn,
+    required this._register,
+    required this._restoreSession,
+    required this._becomeHost,
+    required this._signOut,
+  });
 
   final SignIn _signIn;
   final RegisterAccount _register;
@@ -120,5 +116,4 @@ class AuthController extends ChangeNotifier {
     }
     return 'Ocurrió un problema. Inténtalo de nuevo.';
   }
-
 }

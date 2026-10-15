@@ -12,8 +12,13 @@ class AuthRepositoryImpl implements AuthRepository {
   final AuthLocalDataSource local;
 
   @override
-  Future<AuthSession> signIn({required String email, required String password}) async {
-    final session = AuthSessionModel.fromJson(await remote.signIn(email, password));
+  Future<AuthSession> signIn({
+    required String email,
+    required String password,
+  }) async {
+    final session = AuthSessionModel.fromJson(
+      await remote.signIn(email, password),
+    );
     await local.saveToken(session.accessToken);
     return session;
   }
@@ -25,12 +30,14 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
     String? phone,
   }) async {
-    final session = AuthSessionModel.fromJson(await remote.register(
-      name: name,
-      email: email,
-      password: password,
-      phone: phone,
-    ));
+    final session = AuthSessionModel.fromJson(
+      await remote.register(
+        name: name,
+        email: email,
+        password: password,
+        phone: phone,
+      ),
+    );
     await local.saveToken(session.accessToken);
     return session;
   }
@@ -58,18 +65,24 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<AppUser> becomeHost() async {
     final token = await local.readToken();
-    if (token == null) throw const ApiException(
-      statusCode: 401,
-      code: 'SESSION_REQUIRED',
-      message: 'Inicia sesión para activar tu perfil de anfitrión.',
-    );
+    if (token == null) {
+      throw const ApiException(
+        statusCode: 401,
+        code: 'SESSION_REQUIRED',
+        message: 'Inicia sesión para activar tu perfil de anfitrión.',
+      );
+    }
     final response = await remote.becomeHost(token);
     final userJson = response['user'];
     if (userJson is! Map<String, dynamic>) {
-      throw const FormatException('La API devolvió un perfil de anfitrión incompleto.');
+      throw const FormatException(
+        'La API devolvió un perfil de anfitrión incompleto.',
+      );
     }
     final newToken = response['token']?.toString();
-    if (newToken != null && newToken.isNotEmpty) await local.saveToken(newToken);
+    if (newToken != null && newToken.isNotEmpty) {
+      await local.saveToken(newToken);
+    }
     return AppUserModel.fromJson(userJson);
   }
 
