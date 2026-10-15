@@ -1,0 +1,86 @@
+# CI de XelaStay: verifica los cambios en una máquina limpia.
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch: # botón "Run workflow" en la pestaña Actions
+
+permissions:
+  contents: read
+
+# Cancela la corrida anterior cuando hay nuevos cambios en la misma referencia.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# La aplicación Flutter está en una subcarpeta del repositorio.
+defaults:
+  run:
+    working-directory: xelastay
+
+env:
+  FLUTTER_VERSION: '3.47.0'
+
+jobs:
+  calidad:
+    name: Formato, análisis y pruebas
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      # Misma versión que el SDK utilizado por el proyecto.
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Dependencias
+        run: flutter pub get
+
+      - name: Formato (dart format)
+        run: dart format --output=none --set-exit-if-changed lib test
+
+      - name: Análisis estático (flutter analyze)
+        run: flutter analyze
+
+      - name: Pruebas (flutter test)
+        run: flutter test --reporter expanded
+
+  apk:
+    name: APK de prueba
+    needs: calidad # solo si la calidad pasó
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Dependencias
+        run: flutter pub get
+
+      # APK debug para instalar y probar la aplicación en Android.
+      - name: Compilar APK
+        run: flutter build apk --debug
+
+      # Las rutas de las acciones se resuelven desde la raíz del repositorio.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: xelastay-apk-${{ github.sha }}
+          path: xelastay/build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
+          retention-days: 7

@@ -26,7 +26,10 @@ Future<void> main() async {
   final apiClient = ApiClient();
   final localAuth = AuthLocalDataSource(storage);
   final authRemote = AuthRemoteDataSource(apiClient);
-  final authRepository = AuthRepositoryImpl(remote: authRemote, local: localAuth);
+  final authRepository = AuthRepositoryImpl(
+    remote: authRemote,
+    local: localAuth,
+  );
   final authController = AuthController(
     signIn: SignIn(authRepository),
     register: RegisterAccount(authRepository),
@@ -39,9 +42,11 @@ Future<void> main() async {
   final staysRemote = StaysRemoteDataSource(apiClient, localAuth.readToken);
   final staysRepository = StaysRepositoryImpl(staysRemote);
 
-  runApp(XelaStayApp(
-    authController: authController,
-    createHostStay: CreateHostStay(hostsRepository),
-    getPublicStays: GetPublicStays(staysRepository),
-  ));
+  runApp(
+    XelaStayApp(
+      authController: authController,
+      createHostStay: CreateHostStay(hostsRepository),
+      getPublicStays: GetPublicStays(staysRepository),
+    ),
+  );
 }

@@ -41,12 +41,15 @@ class ProfilePage extends StatelessWidget {
                 Text(
                   user.name,
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontSize: 25,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.headlineMedium?.copyWith(fontSize: 25),
                 ),
                 const SizedBox(height: 5),
-                Text(user.email, style: const TextStyle(color: AppColors.muted)),
+                Text(
+                  user.email,
+                  style: const TextStyle(color: AppColors.muted),
+                ),
               ],
             ),
           ),
@@ -67,7 +70,9 @@ class ProfilePage extends StatelessWidget {
               _ProfileRow(
                 icon: Icons.phone_outlined,
                 label: 'Teléfono',
-                value: user.phone?.isNotEmpty == true ? user.phone! : 'Sin agregar',
+                value: user.phone?.isNotEmpty == true
+                    ? user.phone!
+                    : 'Sin agregar',
               ),
               _ProfileRow(
                 icon: Icons.badge_outlined,
@@ -87,7 +92,11 @@ class ProfilePage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.home_work_outlined, color: AppColors.blue, size: 26),
+                const Icon(
+                  Icons.home_work_outlined,
+                  color: AppColors.blue,
+                  size: 26,
+                ),
                 const SizedBox(height: 10),
                 Text(
                   user.canManageStays
@@ -106,10 +115,14 @@ class ProfilePage extends StatelessWidget {
                 OutlinedButton.icon(
                   onPressed: onOpenHosts,
                   icon: Icon(
-                    user.canManageStays ? Icons.dashboard_outlined : Icons.add_home_outlined,
+                    user.canManageStays
+                        ? Icons.dashboard_outlined
+                        : Icons.add_home_outlined,
                   ),
                   label: Text(
-                    user.canManageStays ? 'Ir al panel de anfitrión' : 'Conocer modo anfitrión',
+                    user.canManageStays
+                        ? 'Ir al panel de anfitrión'
+                        : 'Conocer modo anfitrión',
                   ),
                 ),
               ],
@@ -193,9 +206,21 @@ class _ProfileRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(label, style: const TextStyle(color: AppColors.muted, fontSize: 12)),
+                  Text(
+                    label,
+                    style: const TextStyle(
+                      color: AppColors.muted,
+                      fontSize: 12,
+                    ),
+                  ),
                   const SizedBox(height: 3),
-                  Text(value, style: const TextStyle(color: AppColors.ink, fontWeight: FontWeight.w600)),
+                  Text(
+                    value,
+                    style: const TextStyle(
+                      color: AppColors.ink,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ],
               ),
             ),

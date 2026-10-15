@@ -120,5 +120,4 @@ class AuthController extends ChangeNotifier {
     }
     return 'Ocurrió un problema. Inténtalo de nuevo.';
   }
-
 }

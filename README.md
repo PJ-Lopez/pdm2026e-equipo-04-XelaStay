@@ -62,6 +62,16 @@ lib/
 │   └── utils/                         # Formateadores de moneda (Q) y helpers
 │
 └── features/                          # Módulos por capacidad funcional
+    ├── auth/                           # Registro, login, sesión y acceso por roles
+    │   ├── domain/                    # Usuario, contratos y casos de uso
+    │   ├── data/                      # API de identidad y token en almacenamiento seguro
+    │   └── presentation/              # Formularios de acceso y estado de autenticación
+    │
+    ├── hosts/                          # Activación de anfitrión y registro de alojamientos
+    │   ├── domain/                    # Entidades, repositorio y casos de uso
+    │   ├── data/                      # Adaptadores para endpoints de anfitrión
+    │   └── presentation/              # Panel y formulario de alojamiento
+    │
     ├── stays/                         # Módulo de exploración y catálogo de lugares
     │   ├── domain/                    # Entidades puras (Stay, Location, Review) y contratos
     │   ├── data/                      # Modelos con serialización y fuentes de datos

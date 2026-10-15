@@ -38,7 +38,12 @@ class _SantaMariaPainter extends CustomPainter {
 
     final horizon = Path()
       ..moveTo(0, size.height * .9)
-      ..quadraticBezierTo(size.width * .42, size.height * .76, size.width, size.height * .89);
+      ..quadraticBezierTo(
+        size.width * .42,
+        size.height * .76,
+        size.width,
+        size.height * .89,
+      );
     canvas.drawPath(
       horizon,
       Paint()

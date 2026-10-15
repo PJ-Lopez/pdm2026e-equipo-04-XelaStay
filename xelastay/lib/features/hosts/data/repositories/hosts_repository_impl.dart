@@ -12,7 +12,9 @@ class HostsRepositoryImpl implements HostsRepository {
     final response = await _remote.createStay(draft);
     final stayJson = response['stay'];
     if (stayJson is! Map<String, dynamic>) {
-      throw const FormatException('La API no devolvió los datos del alojamiento creado.');
+      throw const FormatException(
+        'La API no devolvió los datos del alojamiento creado.',
+      );
     }
     return HostStayModel.fromJson(stayJson);
   }
