@@ -2,6 +2,33 @@
 
 Aplicación Flutter para XelaStay, orientada a iOS y Android.
 
+## Laboratorio: estados del catálogo
+
+`StaysPage` recibe `GetPublicStays`, que depende del contrato
+`StaysRepository`. La app normal mantiene el repositorio del API. La entrada
+independiente de demostración usa `SimulatedStaysRepository` con 800 ms de
+latencia, sin requerir inicio de sesión ni servidor:
+
+```bash
+flutter run -t lib/main_stays_demo.dart --dart-define=STAYS_SCENARIO=data
+flutter run -t lib/main_stays_demo.dart --dart-define=STAYS_SCENARIO=error
+flutter run -t lib/main_stays_demo.dart --dart-define=STAYS_SCENARIO=empty
+```
+
+En los tres casos se muestra primero un spinner con texto. `data` muestra dos
+alojamientos; `error` muestra un mensaje y permite reintentar; `empty` permite
+actualizar. Reintentar o actualizar conserva el escenario elegido; para cambiarlo
+se debe ejecutar otro comando. Una búsqueda sin coincidencias permite limpiar
+el filtro. El botón de perfil no navega en esta demostración aislada.
+
+```bash
+flutter test test/features/stays/stays_page_test.dart
+```
+
+Las pruebas sustituyen el repositorio mediante inyección de constructor, sin
+HTTP ni almacenamiento real. Cubren carga, datos, error, reintento con recuperación,
+vacío con actualización y limpieza de búsqueda.
+
 ## Módulos
 
 Las features siguen Clean Architecture con dependencias hacia adentro:
