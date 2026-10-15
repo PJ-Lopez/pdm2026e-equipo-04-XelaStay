@@ -28,10 +28,7 @@ class _StaysStatePageState extends State<StaysStatePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mi pantalla'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('Mi pantalla'), centerTitle: true),
       body: FutureBuilder<List<StayItem>>(
         future: _futureStays,
         builder: (context, snapshot) {
@@ -69,7 +66,10 @@ class _StaysStatePageState extends State<StaysStatePage> {
                     const Text(
                       'No pudimos cargar los datos.',
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     const Text(
@@ -122,7 +122,7 @@ class _StaysStatePageState extends State<StaysStatePage> {
           return ListView.separated(
             padding: const EdgeInsets.all(16),
             itemCount: data.length,
-            separatorBuilder: (_, __) => const Divider(),
+            separatorBuilder: (_, _) => const Divider(),
             itemBuilder: (context, index) {
               final stay = data[index];
               return ListTile(

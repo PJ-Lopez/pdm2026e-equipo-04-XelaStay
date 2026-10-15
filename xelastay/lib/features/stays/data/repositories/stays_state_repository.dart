@@ -13,12 +13,18 @@ class StayItem {
 }
 
 abstract class IStaysStateRepository {
-  Future<List<StayItem>> fetchStays({bool forceError = false, bool forceEmpty = false});
+  Future<List<StayItem>> fetchStays({
+    bool forceError = false,
+    bool forceEmpty = false,
+  });
 }
 
 class StaysStateRepository implements IStaysStateRepository {
   @override
-  Future<List<StayItem>> fetchStays({bool forceError = false, bool forceEmpty = false}) async {
+  Future<List<StayItem>> fetchStays({
+    bool forceError = false,
+    bool forceEmpty = false,
+  }) async {
     // Simula latencia de red de 600 ms
     await Future.delayed(const Duration(milliseconds: 600));
 
