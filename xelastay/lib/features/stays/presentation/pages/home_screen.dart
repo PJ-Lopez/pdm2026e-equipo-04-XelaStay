@@ -62,10 +62,9 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 28),
             Text(
               'Tu próxima historia empieza en Xela.',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontSize: 29,
-                height: 1.15,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineMedium?.copyWith(fontSize: 29, height: 1.15),
             ),
             const SizedBox(height: 9),
             const Text(
@@ -75,7 +74,8 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 22),
             TextField(
               controller: _searchController,
-              onChanged: (value) => setState(() => _search = value.trim().toLowerCase()),
+              onChanged: (value) =>
+                  setState(() => _search = value.trim().toLowerCase()),
               decoration: InputDecoration(
                 hintText: '¿Qué te gustaría tener cerca?',
                 prefixIcon: const Icon(Icons.search),
@@ -118,8 +118,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           const SizedBox(height: 8),
                           Text(
                             'Descubre Xela a tu manera',
-                            style: Theme.of(context).textTheme.titleLarge
-                                ?.copyWith(fontSize: 19),
+                            style: Theme.of(
+                              context,
+                            ).textTheme.titleLarge?.copyWith(fontSize: 19),
                           ),
                           const SizedBox(height: 5),
                           const Text(
@@ -151,10 +152,12 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Expanded(
                   child: Text(
-                    _search.isEmpty ? 'Alojamientos para descubrir' : 'Resultados',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontSize: 21,
-                    ),
+                    _search.isEmpty
+                        ? 'Alojamientos para descubrir'
+                        : 'Resultados',
+                    style: Theme.of(
+                      context,
+                    ).textTheme.titleLarge?.copyWith(fontSize: 21),
                   ),
                 ),
                 IconButton(
@@ -265,7 +268,10 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 String _initials(String name) {
-  final names = name.trim().split(RegExp(r'\s+')).where((part) => part.isNotEmpty);
+  final names = name
+      .trim()
+      .split(RegExp(r'\s+'))
+      .where((part) => part.isNotEmpty);
   final firstTwo = names.take(2).map((part) => part[0].toUpperCase()).join();
   return firstTwo.isEmpty ? 'X' : firstTwo;
 }
@@ -303,13 +309,17 @@ class _StayCard extends StatelessWidget {
                       stay.title,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontSize: 17,
-                      ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.titleMedium?.copyWith(fontSize: 17),
                     ),
                   ),
                   if (stay.ratingCount > 0) ...[
-                    const Icon(Icons.star_rounded, color: Color(0xFFE8A638), size: 19),
+                    const Icon(
+                      Icons.star_rounded,
+                      color: Color(0xFFE8A638),
+                      size: 19,
+                    ),
                     const SizedBox(width: 3),
                     Text(stay.ratingAverage.toStringAsFixed(1)),
                   ],
@@ -333,9 +343,13 @@ class _StayCard extends StatelessWidget {
               Row(
                 children: [
                   Icon(
-                    stay.isVerified ? Icons.verified_outlined : Icons.place_outlined,
+                    stay.isVerified
+                        ? Icons.verified_outlined
+                        : Icons.place_outlined,
                     size: 17,
-                    color: stay.isVerified ? AppColors.success : AppColors.muted,
+                    color: stay.isVerified
+                        ? AppColors.success
+                        : AppColors.muted,
                   ),
                   const SizedBox(width: 5),
                   Expanded(
@@ -344,7 +358,9 @@ class _StayCard extends StatelessWidget {
                           ? 'Ubicación revisada'
                           : 'Ubicación pendiente de revisión',
                       style: TextStyle(
-                        color: stay.isVerified ? AppColors.success : AppColors.muted,
+                        color: stay.isVerified
+                            ? AppColors.success
+                            : AppColors.muted,
                         fontSize: 12,
                       ),
                     ),
@@ -384,20 +400,18 @@ class _StayImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (url == null || url!.isEmpty) {
-      return const ImagePlaceholder(label: 'Aquí va una imagen del alojamiento');
+      return const ImagePlaceholder(
+        label: 'Aquí va una imagen del alojamiento',
+      );
     }
     return Image.network(
       url!,
       fit: BoxFit.cover,
-      errorBuilder: (context, error, stackTrace) => const ImagePlaceholder(
-        label: 'Aquí va una imagen del alojamiento',
-      ),
+      errorBuilder: (context, error, stackTrace) =>
+          const ImagePlaceholder(label: 'Aquí va una imagen del alojamiento'),
       loadingBuilder: (context, child, progress) => progress == null
           ? child
-          : const ImagePlaceholder(
-              label: 'Cargando imagen',
-              compact: true,
-            ),
+          : const ImagePlaceholder(label: 'Cargando imagen', compact: true),
     );
   }
 }
@@ -407,11 +421,7 @@ class _CatalogLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => const Column(
-    children: [
-      _LoadingCard(),
-      SizedBox(height: 16),
-      _LoadingCard(),
-    ],
+    children: [_LoadingCard(), SizedBox(height: 16), _LoadingCard()],
   );
 }
 
@@ -464,9 +474,17 @@ class _CatalogMessage extends StatelessWidget {
       children: [
         Icon(icon, size: 34, color: AppColors.blue),
         const SizedBox(height: 12),
-        Text(title, textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          title,
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
         const SizedBox(height: 6),
-        Text(detail, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.muted, height: 1.4)),
+        Text(
+          detail,
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: AppColors.muted, height: 1.4),
+        ),
         if (action != null) ...[const SizedBox(height: 16), action!],
       ],
     ),

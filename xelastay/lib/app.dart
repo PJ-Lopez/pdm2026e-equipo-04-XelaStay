@@ -75,7 +75,8 @@ class _XelaStayAppState extends State<XelaStayApp> {
     createStay: (context) async {
       await _navigatorKey.currentState?.push<void>(
         MaterialPageRoute<void>(
-          builder: (_) => CreateHostStayPage(createHostStay: widget.createHostStay),
+          builder: (_) =>
+              CreateHostStayPage(createHostStay: widget.createHostStay),
         ),
       );
     },

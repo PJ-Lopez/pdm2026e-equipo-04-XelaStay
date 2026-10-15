@@ -45,6 +45,7 @@ class StayModel extends Stay {
   static int _integer(Object? value) =>
       value is num ? value.round() : int.tryParse(value?.toString() ?? '') ?? 0;
 
-  static double _decimal(Object? value) =>
-      value is num ? value.toDouble() : double.tryParse(value?.toString() ?? '') ?? 0;
+  static double _decimal(Object? value) => value is num
+      ? value.toDouble()
+      : double.tryParse(value?.toString() ?? '') ?? 0;
 }
