@@ -6,8 +6,8 @@ import '../../../auth/domain/entities/app_user.dart';
 import '../../domain/entities/stay.dart';
 import '../../domain/usecases/get_public_stays.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({
+class StaysPage extends StatefulWidget {
+  const StaysPage({
     super.key,
     required this.user,
     required this.getPublicStays,
@@ -19,10 +19,10 @@ class HomeScreen extends StatefulWidget {
   final VoidCallback onOpenProfile;
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<StaysPage> createState() => _StaysPageState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _StaysPageState extends State<StaysPage> {
   final _searchController = TextEditingController();
   late Future<List<Stay>> _staysFuture;
   String _search = '';
@@ -41,7 +41,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _refresh() async {
     final future = widget.getPublicStays();
-    setState(() => _staysFuture = future);
+    setState(() {
+      _staysFuture = future;
+    });
     try {
       await future;
     } catch (_) {
@@ -180,9 +182,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     title: 'No pudimos cargar los alojamientos',
                     detail: 'Revisa tu conexión e inténtalo de nuevo.',
                     action: FilledButton.tonalIcon(
-                      onPressed: () => setState(
-                        () => _staysFuture = widget.getPublicStays(),
-                      ),
+                      onPressed: () => _refresh(),
                       icon: const Icon(Icons.refresh),
                       label: const Text('Reintentar'),
                     ),
@@ -200,6 +200,20 @@ class _HomeScreenState extends State<HomeScreen> {
                     detail: _search.isEmpty
                         ? 'Vuelve pronto para conocer nuevos espacios en Xela.'
                         : 'Prueba con otro nombre, zona o referencia.',
+                    action: FilledButton.tonalIcon(
+                      onPressed: _search.isEmpty
+                          ? () => _refresh()
+                          : () {
+                              _searchController.clear();
+                              setState(() => _search = '');
+                            },
+                      icon: Icon(
+                        _search.isEmpty ? Icons.refresh : Icons.search_off,
+                      ),
+                      label: Text(
+                        _search.isEmpty ? 'Actualizar' : 'Limpiar búsqueda',
+                      ),
+                    ),
                   );
                 }
                 return Column(
@@ -421,30 +435,13 @@ class _CatalogLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => const Column(
-    children: [_LoadingCard(), SizedBox(height: 16), _LoadingCard()],
-  );
-}
-
-class _LoadingCard extends StatelessWidget {
-  const _LoadingCard();
-
-  @override
-  Widget build(BuildContext context) => Container(
-    height: 286,
-    decoration: BoxDecoration(
-      color: AppColors.surface,
-      borderRadius: BorderRadius.circular(22),
-      border: Border.all(color: AppColors.line),
-    ),
-    child: const Column(
-      children: [
-        Expanded(child: ImagePlaceholder(label: 'Cargando alojamientos')),
-        Padding(
-          padding: EdgeInsets.all(16),
-          child: LinearProgressIndicator(minHeight: 3),
-        ),
-      ],
-    ),
+    children: [
+      SizedBox(height: 24),
+      CircularProgressIndicator(semanticsLabel: 'Cargando alojamientos'),
+      SizedBox(height: 16),
+      Text('Cargando alojamientos'),
+      SizedBox(height: 24),
+    ],
   );
 }
 
