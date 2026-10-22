@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import '../lib/features/stays/data/repositories/reviews_repository.dart';
-import '../lib/features/stays/presentation/pages/reviews_page.dart';
+import 'package:xelastay/features/stays/data/repositories/reviews_repository.dart';
+import 'package:xelastay/features/stays/presentation/pages/reviews_page.dart';
 
 class FakeErrorReviewsRepository implements IReviewsRepository {
   @override

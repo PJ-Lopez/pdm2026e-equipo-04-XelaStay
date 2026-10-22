@@ -314,14 +314,9 @@ class _CreateHostStayPageState extends State<CreateHostStayPage> {
     ),
     validator: (value) {
       final parsed = double.tryParse((value ?? '').replaceAll(',', '.'));
-<<<<<<< Updated upstream
       if (parsed == null || parsed < min || parsed > max) {
         return 'Coordenada inválida';
       }
-=======
-      if (parsed == null || parsed < min || parsed > max)
-        return 'Coordenada inválida';
->>>>>>> Stashed changes
       return null;
     },
     decoration: InputDecoration(labelText: label),

@@ -80,14 +80,9 @@ class AuthRepositoryImpl implements AuthRepository {
       );
     }
     final newToken = response['token']?.toString();
-<<<<<<< Updated upstream
     if (newToken != null && newToken.isNotEmpty) {
       await local.saveToken(newToken);
     }
-=======
-    if (newToken != null && newToken.isNotEmpty)
-      await local.saveToken(newToken);
->>>>>>> Stashed changes
     return AppUserModel.fromJson(userJson);
   }
 

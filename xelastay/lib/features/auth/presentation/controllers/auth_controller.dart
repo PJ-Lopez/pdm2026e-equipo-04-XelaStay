@@ -11,19 +11,11 @@ import '../../domain/usecases/sign_out.dart';
 class AuthController extends ChangeNotifier {
   AuthController({
     required this._signIn,
-<<<<<<< Updated upstream
     required this._register,
     required this._restoreSession,
     required this._becomeHost,
     required this._signOut,
   });
-=======
-    required RegisterAccount register,
-    required this._restoreSession,
-    required this._becomeHost,
-    required this._signOut,
-  }) : _register = register;
->>>>>>> Stashed changes
 
   final SignIn _signIn;
   final RegisterAccount _register;
