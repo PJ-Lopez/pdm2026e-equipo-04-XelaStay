@@ -8,6 +8,8 @@ import 'features/auth/presentation/pages/sign_in_page.dart';
 import 'features/hosts/domain/usecases/create_host_stay.dart';
 import 'features/hosts/presentation/pages/create_host_stay_page.dart';
 import 'features/hosts/presentation/pages/host_dashboard_page.dart';
+import 'features/booking/presentation/pages/reservations_page.dart';
+import 'features/favorites/presentation/pages/guardados_page.dart';
 import 'features/stays/domain/usecases/get_public_stays.dart';
 import 'features/stays/presentation/pages/stays_page.dart';
 
@@ -129,8 +131,10 @@ class _GuestAppShellState extends State<_GuestAppShell> {
         StaysPage(
           user: widget.user,
           getPublicStays: widget.getPublicStays,
-          onOpenProfile: () => setState(() => _selectedIndex = 1),
+          onOpenProfile: () => setState(() => _selectedIndex = 3),
         ),
+        GuardadosPage(onExplore: () => setState(() => _selectedIndex = 0)),
+        const ReservationsPage(),
         ProfilePage(
           user: widget.user,
           authController: widget.authController,
@@ -146,6 +150,16 @@ class _GuestAppShellState extends State<_GuestAppShell> {
           icon: Icon(Icons.explore_outlined),
           selectedIcon: Icon(Icons.explore),
           label: 'Explorar',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.favorite_border),
+          selectedIcon: Icon(Icons.favorite),
+          label: 'Guardados',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.luggage_outlined),
+          selectedIcon: Icon(Icons.luggage),
+          label: 'Reservas',
         ),
         NavigationDestination(
           icon: Icon(Icons.person_outline),
