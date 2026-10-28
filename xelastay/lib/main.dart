@@ -16,6 +16,9 @@ import 'features/auth/presentation/controllers/auth_controller.dart';
 import 'features/hosts/data/datasources/hosts_remote_data_source.dart';
 import 'features/hosts/data/repositories/hosts_repository_impl.dart';
 import 'features/hosts/domain/usecases/create_host_stay.dart';
+import 'features/favorites/data/datasources/favorites_remote_data_source.dart';
+import 'features/favorites/data/repositories/favorites_repository_impl.dart';
+import 'features/favorites/presentation/providers/favorites_providers.dart';
 import 'features/stays/data/datasources/stays_remote_data_source.dart';
 import 'features/stays/data/repositories/stays_repository_impl.dart';
 import 'features/stays/domain/usecases/get_public_stays.dart';
@@ -40,11 +43,19 @@ Future<void> main() async {
   );
   final hostsRemote = HostsRemoteDataSource(apiClient, localAuth.readToken);
   final hostsRepository = HostsRepositoryImpl(hostsRemote);
+  final favoritesRemote = FavoritesRemoteDataSource(
+    apiClient,
+    localAuth.readToken,
+  );
+  final favoritesRepository = FavoritesRepositoryImpl(favoritesRemote);
   final staysRemote = StaysRemoteDataSource(apiClient, localAuth.readToken);
   final staysRepository = StaysRepositoryImpl(staysRemote);
 
   runApp(
     ProviderScope(
+      overrides: [
+        favoritesRepositoryProvider.overrideWithValue(favoritesRepository),
+      ],
       child: XelaStayApp(
         authController: authController,
         createHostStay: CreateHostStay(hostsRepository),

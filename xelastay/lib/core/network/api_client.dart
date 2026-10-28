@@ -47,6 +47,9 @@ class ApiClient {
     Map<String, Object?>? body,
   }) => _send('POST', path, token: token, body: body);
 
+  Future<Map<String, dynamic>> delete(String path, {String? token}) =>
+      _send('DELETE', path, token: token);
+
   Future<Map<String, dynamic>> _send(
     String method,
     String path, {

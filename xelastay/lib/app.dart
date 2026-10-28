@@ -9,6 +9,7 @@ import 'features/hosts/domain/usecases/create_host_stay.dart';
 import 'features/hosts/presentation/pages/create_host_stay_page.dart';
 import 'features/hosts/presentation/pages/host_dashboard_page.dart';
 import 'features/booking/presentation/pages/reservations_page.dart';
+import 'features/favorites/presentation/pages/guardados_page.dart';
 import 'features/stays/domain/usecases/get_public_stays.dart';
 import 'features/stays/presentation/pages/stays_page.dart';
 
@@ -132,7 +133,7 @@ class _GuestAppShellState extends State<_GuestAppShell> {
           getPublicStays: widget.getPublicStays,
           onOpenProfile: () => setState(() => _selectedIndex = 3),
         ),
-        const _SavedPage(),
+        GuardadosPage(onExplore: () => setState(() => _selectedIndex = 0)),
         const ReservationsPage(),
         ProfilePage(
           user: widget.user,
@@ -166,28 +167,6 @@ class _GuestAppShellState extends State<_GuestAppShell> {
           label: 'Perfil',
         ),
       ],
-    ),
-  );
-}
-
-class _SavedPage extends StatelessWidget {
-  const _SavedPage();
-
-  @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Guardados')),
-    body: const Center(
-      child: Padding(
-        padding: EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.favorite_border, size: 44, color: Color(0xFF244D82)),
-            SizedBox(height: 12),
-            Text('Tus alojamientos guardados aparecerán aquí.'),
-          ],
-        ),
-      ),
     ),
   );
 }
