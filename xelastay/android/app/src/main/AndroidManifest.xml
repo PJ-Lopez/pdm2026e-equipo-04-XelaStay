@@ -1,8 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Permiso obligatorio para realizar peticiones de red a xela-stayAPI -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+
     <application
         android:label="xelastay"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:usesCleartextTraffic="true"> <!-- Permite tráfico HTTP no cifrado hacia tu puerto 3000 -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
