@@ -16,6 +16,7 @@ import 'features/auth/presentation/controllers/auth_controller.dart';
 import 'features/hosts/data/datasources/hosts_remote_data_source.dart';
 import 'features/hosts/data/repositories/hosts_repository_impl.dart';
 import 'features/hosts/domain/usecases/create_host_stay.dart';
+import 'features/listas/presentation/providers/guardados_providers.dart';
 import 'features/stays/data/datasources/stays_remote_data_source.dart';
 import 'features/stays/data/repositories/stays_repository_impl.dart';
 import 'features/stays/domain/usecases/get_public_stays.dart';
@@ -42,14 +43,19 @@ Future<void> main() async {
   final hostsRepository = HostsRepositoryImpl(hostsRemote);
   final staysRemote = StaysRemoteDataSource(apiClient, localAuth.readToken);
   final staysRepository = StaysRepositoryImpl(staysRemote);
+  final getPublicStays = GetPublicStays(staysRepository);
 
   runApp(
     // ProviderScope: guarda el estado de los providers (listas de viaje).
     ProviderScope(
+      overrides: [
+        // El catálogo para agregar alojamientos a una lista viene del API.
+        getPublicStaysProvider.overrideWithValue(getPublicStays),
+      ],
       child: XelaStayApp(
         authController: authController,
         createHostStay: CreateHostStay(hostsRepository),
-        getPublicStays: GetPublicStays(staysRepository),
+        getPublicStays: getPublicStays,
       ),
     ),
   );

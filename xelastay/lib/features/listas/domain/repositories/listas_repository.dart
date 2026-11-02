@@ -11,4 +11,10 @@ abstract interface class ListasRepository {
     required String nombre,
     String descripcion = '',
   });
+
+  Future<void> archivar(int id, {required bool archivada});
+
+  /// Solo se borra si ningún alojamiento la usa; si no, lanza
+  /// [ListaException] sugiriendo archivarla.
+  Future<void> eliminar(int id);
 }

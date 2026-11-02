@@ -5,6 +5,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../domain/entities/lista.dart';
 import '../providers/listas_providers.dart';
 import '../widgets/lista_form.dart';
+import 'lista_detalle_page.dart';
 
 class ListasPage extends ConsumerWidget {
   const ListasPage({super.key});
@@ -27,12 +28,30 @@ class ListasPage extends ConsumerWidget {
             child: const Text('No pudimos leer tus listas. Reintentar'),
           ),
         ),
-        data: (todas) => todas.isEmpty
-            ? const _SinListas()
-            : ListView(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
-                children: [for (final l in todas) _ListaTile(lista: l)],
-              ),
+        data: (todas) {
+          if (todas.isEmpty) return const _SinListas();
+          final archivadas = todas.where((l) => l.archivada);
+          return ListView(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+            children: [
+              for (final l in todas.where((l) => !l.archivada))
+                _ListaTile(lista: l),
+              if (archivadas.isNotEmpty) ...[
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(4, 16, 4, 8),
+                  child: Text(
+                    'Archivadas',
+                    style: TextStyle(
+                      color: AppColors.muted,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                for (final l in archivadas) _ListaTile(lista: l),
+              ],
+            ],
+          );
+        },
       ),
     );
   }
@@ -54,13 +73,31 @@ class _ListaTile extends ConsumerWidget {
     ),
     child: ListTile(
       contentPadding: const EdgeInsets.fromLTRB(16, 6, 8, 6),
-      leading: const CircleAvatar(
-        backgroundColor: AppColors.blueSoft,
-        child: Icon(Icons.bookmark_outline, color: AppColors.blue),
+      leading: CircleAvatar(
+        backgroundColor: lista.archivada
+            ? AppColors.canvas
+            : AppColors.blueSoft,
+        child: Icon(
+          lista.archivada ? Icons.inventory_2_outlined : Icons.bookmark_outline,
+          color: lista.archivada ? AppColors.muted : AppColors.blue,
+        ),
       ),
-      title: Text(lista.nombre),
+      title: Text(
+        lista.nombre,
+        style: TextStyle(
+          color: lista.archivada ? AppColors.muted : AppColors.ink,
+        ),
+      ),
       subtitle: Text(_resumen(lista)),
-      trailing: const Icon(Icons.edit_outlined, color: AppColors.muted),
+      trailing: IconButton(
+        tooltip: 'Ver alojamientos',
+        icon: const Icon(Icons.chevron_right),
+        onPressed: () => Navigator.of(context).push<void>(
+          MaterialPageRoute<void>(
+            builder: (_) => ListaDetallePage(lista: lista),
+          ),
+        ),
+      ),
       // Tocar el registro abre el formulario lleno para editarlo.
       onTap: () => abrirFormularioLista(context, ref, lista: lista),
     ),
@@ -101,6 +138,11 @@ Future<void> abrirFormularioLista(
   Lista? lista,
 }) async {
   final repositorio = ref.read(listasRepositoryProvider);
+  // Se toma ANTES de abrir el formulario: al archivar o eliminar, la fila que
+  // se tocó cambia de lugar o desaparece y su `context` deja de servir.
+  final avisos = ScaffoldMessenger.of(context);
+  void refrescar() => ref.invalidate(listasProvider);
+
   final mensaje = await showModalBottomSheet<String>(
     context: context,
     isScrollControlled: true,
@@ -114,12 +156,26 @@ Future<void> abrirFormularioLista(
           nombre: datos.nombre,
           descripcion: datos.descripcion,
         );
-        ref.invalidate(listasProvider);
+        refrescar();
       },
+      onArchivar: lista == null
+          ? null
+          : () async {
+              await repositorio.archivar(lista.id, archivada: !lista.archivada);
+              refrescar();
+            },
+      // Si la lista está en uso, eliminar lanza ListaException: el formulario
+      // muestra el mensaje y la lista no se toca.
+      onEliminar: lista == null
+          ? null
+          : () async {
+              await repositorio.eliminar(lista.id);
+              refrescar();
+            },
     ),
   );
-  if (mensaje != null && context.mounted) {
-    ScaffoldMessenger.of(context)
+  if (mensaje != null) {
+    avisos
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(content: Text(mensaje)));
   }

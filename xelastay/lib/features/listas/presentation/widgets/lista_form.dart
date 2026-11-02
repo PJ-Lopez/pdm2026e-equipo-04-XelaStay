@@ -7,13 +7,27 @@ typedef DatosLista = ({String nombre, String descripcion});
 
 /// El MISMO formulario crea (`lista == null`) y edita (`lista != null`).
 ///
-/// No conoce SQL ni providers: recibe el registro inicial y la función para
-/// guardar. Al terminar hace `pop` con el mensaje para el SnackBar.
+/// No conoce SQL ni providers: recibe el registro inicial y las funciones
+/// para guardar, archivar y eliminar. Al terminar hace `pop` con el mensaje
+/// para el SnackBar.
 class ListaForm extends StatefulWidget {
-  const ListaForm({super.key, this.lista, required this.onGuardar});
+  const ListaForm({
+    super.key,
+    this.lista,
+    required this.onGuardar,
+    this.onArchivar,
+    this.onEliminar,
+  });
 
   final Lista? lista;
   final Future<void> Function(DatosLista datos) onGuardar;
+
+  /// Archiva o restaura (según `lista.archivada`). Solo al editar.
+  final Future<void> Function()? onArchivar;
+
+  /// Solo al editar. Si la lista está en uso lanza [ListaException] y el
+  /// mensaje queda visible junto al botón "Archivar".
+  final Future<void> Function()? onEliminar;
 
   @override
   State<ListaForm> createState() => _ListaFormState();
@@ -28,6 +42,7 @@ class _ListaFormState extends State<ListaForm> {
   String? _error;
 
   bool get _editando => widget.lista != null;
+  bool get _archivada => widget.lista?.archivada ?? false;
 
   @override
   void initState() {
@@ -57,8 +72,8 @@ class _ListaFormState extends State<ListaForm> {
       await accion();
       if (mounted) Navigator.of(context).pop(mensaje);
     } on ListaException catch (e) {
-      // Mensaje humano (nombre repetido, vacío...): el formulario sigue
-      // abierto para que el usuario lo corrija.
+      // Mensaje humano (nombre repetido, lista en uso...): el formulario
+      // sigue abierto para que el usuario lo corrija o elija otra salida.
       if (mounted) setState(() => _error = e.mensaje);
     } finally {
       if (mounted) setState(() => _ocupado = false);
@@ -120,6 +135,41 @@ class _ListaFormState extends State<ListaForm> {
                 ),
           child: Text(_editando ? 'Guardar cambios' : 'Crear lista'),
         ),
+        if (_editando)
+          Wrap(
+            alignment: WrapAlignment.center,
+            children: [
+              if (widget.onArchivar != null)
+                TextButton.icon(
+                  onPressed: _ocupado
+                      ? null
+                      : () => _ejecutar(
+                          widget.onArchivar!,
+                          mensaje: _archivada
+                              ? 'Lista restaurada'
+                              : 'Lista archivada',
+                        ),
+                  icon: Icon(
+                    _archivada
+                        ? Icons.unarchive_outlined
+                        : Icons.archive_outlined,
+                  ),
+                  label: Text(_archivada ? 'Restaurar' : 'Archivar'),
+                ),
+              if (widget.onEliminar != null)
+                TextButton.icon(
+                  onPressed: _ocupado
+                      ? null
+                      : () => _ejecutar(
+                          widget.onEliminar!,
+                          mensaje: 'Lista eliminada',
+                        ),
+                  style: TextButton.styleFrom(foregroundColor: AppColors.red),
+                  icon: const Icon(Icons.delete_outline),
+                  label: const Text('Eliminar'),
+                ),
+            ],
+          ),
       ],
     ),
   );
