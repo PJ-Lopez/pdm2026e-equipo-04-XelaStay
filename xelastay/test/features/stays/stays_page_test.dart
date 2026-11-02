@@ -1,12 +1,14 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:xelastay/features/auth/domain/entities/app_user.dart';
 import 'package:xelastay/features/stays/data/repositories/simulated_stays_repository.dart';
 import 'package:xelastay/features/stays/domain/entities/stay.dart';
 import 'package:xelastay/features/stays/domain/repositories/stays_repository.dart';
 import 'package:xelastay/features/stays/domain/usecases/get_public_stays.dart';
+import 'package:xelastay/features/stays/presentation/pages/stay_detail_page.dart';
 import 'package:xelastay/features/stays/presentation/pages/stays_page.dart';
 
 void main() {
@@ -118,6 +120,51 @@ void main() {
     );
   });
 
+  testWidgets('Los chips filtran el listado y "Quitar filtros" lo restaura', (
+    tester,
+  ) async {
+    await _pumpPage(
+      tester,
+      const SimulatedStaysRepository(latency: Duration.zero),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Verificados'));
+    await tester.pumpAndSettle();
+    expect(find.text('Apartamento en el centro de Xela'), findsOneWidget);
+    expect(find.text('Cabaña con vista a las montañas'), findsNothing);
+    expect(find.text('1 de 2 alojamientos'), findsOneWidget);
+
+    // Verificado y para 3 o más: ninguno cumple las dos cosas.
+    await tester.tap(find.text('Para 3 o más'));
+    await tester.pumpAndSettle();
+    expect(find.text('No encontramos resultados'), findsOneWidget);
+
+    await tester.ensureVisible(find.text('Quitar filtros'));
+    await tester.tap(find.text('Quitar filtros'));
+    await tester.pumpAndSettle();
+    expect(find.text('Apartamento en el centro de Xela'), findsOneWidget);
+    expect(find.text('Cabaña con vista a las montañas'), findsOneWidget);
+  });
+
+  testWidgets('Tocar una tarjeta abre el detalle del alojamiento', (  
+    tester,
+  ) async {
+    await _pumpPage(
+      tester,
+      const SimulatedStaysRepository(latency: Duration.zero),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.text('Cabaña con vista a las montañas'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Cabaña con vista a las montañas'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(StayDetailPage), findsOneWidget);
+    expect(find.text('Ubicación pendiente de revisión'), findsOneWidget);
+  });
+
   test('El repositorio simulado expone los escenarios vacío y error', () async {
     expect(
       await const SimulatedStaysRepository(
@@ -142,16 +189,19 @@ Future<void> _pumpPage(WidgetTester tester, StaysRepository repository) async {
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
   await tester.pumpWidget(
-    MaterialApp(
-      home: StaysPage(
-        user: const AppUser(
-          id: 'guest',
-          name: 'Visitante',
-          email: 'guest@example.com',
-          role: AppRole.guest,
+    // ProviderScope: el detalle (que se abre al tocar una tarjeta) lo necesita.
+    ProviderScope(
+      child: MaterialApp(
+        home: StaysPage(
+          user: const AppUser(
+            id: 'guest',
+            name: 'Visitante',
+            email: 'guest@example.com',
+            role: AppRole.guest,
+          ),
+          getPublicStays: GetPublicStays(repository),
+          onOpenProfile: () {},
         ),
-        getPublicStays: GetPublicStays(repository),
-        onOpenProfile: () {},
       ),
     ),
   );

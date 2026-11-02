@@ -4,7 +4,10 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/image_placeholder.dart';
 import '../../../auth/domain/entities/app_user.dart';
 import '../../domain/entities/stay.dart';
+import '../../domain/filtros_catalogo.dart';
 import '../../domain/usecases/get_public_stays.dart';
+import '../widgets/stay_photo.dart';
+import 'stay_detail_page.dart';
 
 class StaysPage extends StatefulWidget {
   const StaysPage({
@@ -25,7 +28,10 @@ class StaysPage extends StatefulWidget {
 class _StaysPageState extends State<StaysPage> {
   final _searchController = TextEditingController();
   late Future<List<Stay>> _staysFuture;
-  String _search = '';
+  var _filtros = const FiltrosCatalogo();
+
+  String get _search => _filtros.busqueda.trim();
+  bool get _hayFiltros => _search.isNotEmpty || _filtros.tieneChips;
 
   @override
   void initState() {
@@ -77,7 +83,7 @@ class _StaysPageState extends State<StaysPage> {
             TextField(
               controller: _searchController,
               onChanged: (value) =>
-                  setState(() => _search = value.trim().toLowerCase()),
+                  setState(() => _filtros = _filtros.conBusqueda(value)),
               decoration: InputDecoration(
                 hintText: '¿Qué te gustaría tener cerca?',
                 prefixIcon: const Icon(Icons.search),
@@ -85,10 +91,7 @@ class _StaysPageState extends State<StaysPage> {
                     ? null
                     : IconButton(
                         tooltip: 'Limpiar búsqueda',
-                        onPressed: () {
-                          _searchController.clear();
-                          setState(() => _search = '');
-                        },
+                        onPressed: _limpiarBusqueda,
                         icon: const Icon(Icons.close),
                       ),
               ),
@@ -154,9 +157,7 @@ class _StaysPageState extends State<StaysPage> {
               children: [
                 Expanded(
                   child: Text(
-                    _search.isEmpty
-                        ? 'Alojamientos para descubrir'
-                        : 'Resultados',
+                    _hayFiltros ? 'Resultados' : 'Alojamientos para descubrir',
                     style: Theme.of(
                       context,
                     ).textTheme.titleLarge?.copyWith(fontSize: 21),
@@ -166,6 +167,32 @@ class _StaysPageState extends State<StaysPage> {
                   tooltip: 'Actualizar alojamientos',
                   onPressed: () => _refresh(),
                   icon: const Icon(Icons.refresh),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            // Filtros del listado: se combinan con la búsqueda de texto.
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              children: [
+                FilterChip(
+                  label: const Text('Verificados'),
+                  selected: _filtros.soloVerificados,
+                  onSelected: (_) =>
+                      setState(() => _filtros = _filtros.alternarVerificados()),
+                ),
+                FilterChip(
+                  label: const Text('Hasta Q 300'),
+                  selected: _filtros.precioMaximoCentavos != null,
+                  onSelected: (_) =>
+                      setState(() => _filtros = _filtros.alternarEconomico()),
+                ),
+                FilterChip(
+                  label: const Text('Para 3 o más'),
+                  selected: _filtros.huespedesMinimos != null,
+                  onSelected: (_) =>
+                      setState(() => _filtros = _filtros.alternarGrupo()),
                 ),
               ],
             ),
@@ -190,36 +217,49 @@ class _StaysPageState extends State<StaysPage> {
                 }
 
                 final allStays = snapshot.data ?? const <Stay>[];
-                final stays = allStays.where(_matchesSearch).toList();
+                final stays = _filtros.aplicar(allStays);
                 if (stays.isEmpty) {
                   return _CatalogMessage(
                     icon: Icons.home_work_outlined,
-                    title: _search.isEmpty
-                        ? 'Aún no hay alojamientos publicados'
-                        : 'No encontramos resultados',
-                    detail: _search.isEmpty
+                    title: _hayFiltros
+                        ? 'No encontramos resultados'
+                        : 'Aún no hay alojamientos publicados',
+                    detail: !_hayFiltros
                         ? 'Vuelve pronto para conocer nuevos espacios en Xela.'
+                        : _filtros.tieneChips
+                        ? 'Prueba quitando alguno de los filtros.'
                         : 'Prueba con otro nombre, zona o referencia.',
                     action: FilledButton.tonalIcon(
-                      onPressed: _search.isEmpty
+                      onPressed: !_hayFiltros
                           ? () => _refresh()
-                          : () {
-                              _searchController.clear();
-                              setState(() => _search = '');
-                            },
+                          : _filtros.tieneChips
+                          ? _quitarFiltros
+                          : _limpiarBusqueda,
                       icon: Icon(
-                        _search.isEmpty ? Icons.refresh : Icons.search_off,
+                        _hayFiltros ? Icons.search_off : Icons.refresh,
                       ),
                       label: Text(
-                        _search.isEmpty ? 'Actualizar' : 'Limpiar búsqueda',
+                        !_hayFiltros
+                            ? 'Actualizar'
+                            : _filtros.tieneChips
+                            ? 'Quitar filtros'
+                            : 'Limpiar búsqueda',
                       ),
                     ),
                   );
                 }
                 return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    if (_hayFiltros) ...[
+                      Text(
+                        '${stays.length} de ${allStays.length} alojamientos',
+                        style: const TextStyle(color: AppColors.muted),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
                     for (final stay in stays) ...[
-                      _StayCard(stay: stay),
+                      _StayCard(stay: stay, onTap: () => _abrirDetalle(stay)),
                       const SizedBox(height: 16),
                     ],
                   ],
@@ -273,12 +313,19 @@ class _StaysPageState extends State<StaysPage> {
     ],
   );
 
-  bool _matchesSearch(Stay stay) {
-    if (_search.isEmpty) return true;
-    return '${stay.title} ${stay.zone} ${stay.reference} ${stay.propertyType}'
-        .toLowerCase()
-        .contains(_search);
+  void _limpiarBusqueda() {
+    _searchController.clear();
+    setState(() => _filtros = _filtros.conBusqueda(''));
   }
+
+  void _quitarFiltros() {
+    _searchController.clear();
+    setState(() => _filtros = const FiltrosCatalogo());
+  }
+
+  void _abrirDetalle(Stay stay) => Navigator.of(context).push<void>(
+    MaterialPageRoute<void>(builder: (_) => StayDetailPage(stay: stay)),
+  );
 }
 
 String _initials(String name) {
@@ -291,143 +338,120 @@ String _initials(String name) {
 }
 
 class _StayCard extends StatelessWidget {
-  const _StayCard({required this.stay});
+  const _StayCard({required this.stay, required this.onTap});
 
   final Stay stay;
+  final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => Container(
+  Widget build(BuildContext context) => Material(
+    color: AppColors.surface,
     clipBehavior: Clip.antiAlias,
-    decoration: BoxDecoration(
-      color: AppColors.surface,
+    shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(22),
-      border: Border.all(color: AppColors.line),
+      side: const BorderSide(color: AppColors.line),
     ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          height: 190,
-          width: double.infinity,
-          child: _StayImage(url: stay.coverPhotoUrl),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      stay.title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(
-                        context,
-                      ).textTheme.titleMedium?.copyWith(fontSize: 17),
-                    ),
+    child: InkWell(onTap: onTap, child: _contenido(context)),
+  );
+
+  Widget _contenido(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      SizedBox(
+        height: 190,
+        width: double.infinity,
+        child: StayPhoto(url: stay.coverPhotoUrl),
+      ),
+      Padding(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    stay.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.titleMedium?.copyWith(fontSize: 17),
                   ),
-                  if (stay.ratingCount > 0) ...[
-                    const Icon(
-                      Icons.star_rounded,
-                      color: Color(0xFFE8A638),
-                      size: 19,
-                    ),
-                    const SizedBox(width: 3),
-                    Text(stay.ratingAverage.toStringAsFixed(1)),
-                  ],
-                ],
-              ),
-              const SizedBox(height: 6),
-              Text(
-                stay.zone,
-                style: const TextStyle(color: AppColors.muted, fontSize: 13),
-              ),
-              if (stay.reference.isNotEmpty) ...[
-                const SizedBox(height: 3),
-                Text(
-                  stay.reference,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: AppColors.muted, fontSize: 12),
                 ),
-              ],
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Icon(
-                    stay.isVerified
-                        ? Icons.verified_outlined
-                        : Icons.place_outlined,
-                    size: 17,
-                    color: stay.isVerified
-                        ? AppColors.success
-                        : AppColors.muted,
+                if (stay.ratingCount > 0) ...[
+                  const Icon(
+                    Icons.star_rounded,
+                    color: Color(0xFFE8A638),
+                    size: 19,
                   ),
-                  const SizedBox(width: 5),
-                  Expanded(
-                    child: Text(
-                      stay.isVerified
-                          ? 'Ubicación revisada'
-                          : 'Ubicación pendiente de revisión',
-                      style: TextStyle(
-                        color: stay.isVerified
-                            ? AppColors.success
-                            : AppColors.muted,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                  Text(
-                    '${stay.currency == 'GTQ' ? 'Q' : stay.currency} ${stay.priceInCurrency.toStringAsFixed(0)}',
-                    style: const TextStyle(
-                      color: AppColors.ink,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 17,
-                    ),
-                  ),
-                  const Text(
-                    ' / noche',
-                    style: TextStyle(color: AppColors.muted, fontSize: 11),
-                  ),
+                  const SizedBox(width: 3),
+                  Text(stay.ratingAverage.toStringAsFixed(1)),
                 ],
-              ),
-              const SizedBox(height: 8),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              stay.zone,
+              style: const TextStyle(color: AppColors.muted, fontSize: 13),
+            ),
+            if (stay.reference.isNotEmpty) ...[
+              const SizedBox(height: 3),
               Text(
-                'Hasta ${stay.capacity} huéspedes · ${stay.propertyType}',
+                stay.reference,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(color: AppColors.muted, fontSize: 12),
               ),
             ],
-          ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Icon(
+                  stay.isVerified
+                      ? Icons.verified_outlined
+                      : Icons.place_outlined,
+                  size: 17,
+                  color: stay.isVerified ? AppColors.success : AppColors.muted,
+                ),
+                const SizedBox(width: 5),
+                Expanded(
+                  child: Text(
+                    stay.isVerified
+                        ? 'Ubicación revisada'
+                        : 'Ubicación pendiente de revisión',
+                    style: TextStyle(
+                      color: stay.isVerified
+                          ? AppColors.success
+                          : AppColors.muted,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+                Text(
+                  '${stay.currency == 'GTQ' ? 'Q' : stay.currency} ${stay.priceInCurrency.toStringAsFixed(0)}',
+                  style: const TextStyle(
+                    color: AppColors.ink,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 17,
+                  ),
+                ),
+                const Text(
+                  ' / noche',
+                  style: TextStyle(color: AppColors.muted, fontSize: 11),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Hasta ${stay.capacity} huéspedes · ${stay.propertyType}',
+              style: const TextStyle(color: AppColors.muted, fontSize: 12),
+            ),
+          ],
         ),
-      ],
-    ),
+      ),
+    ],
   );
-}
-
-class _StayImage extends StatelessWidget {
-  const _StayImage({this.url});
-
-  final String? url;
-
-  @override
-  Widget build(BuildContext context) {
-    if (url == null || url!.isEmpty) {
-      return const ImagePlaceholder(
-        label: 'Aquí va una imagen del alojamiento',
-      );
-    }
-    return Image.network(
-      url!,
-      fit: BoxFit.cover,
-      errorBuilder: (context, error, stackTrace) =>
-          const ImagePlaceholder(label: 'Aquí va una imagen del alojamiento'),
-      loadingBuilder: (context, child, progress) => progress == null
-          ? child
-          : const ImagePlaceholder(label: 'Cargando imagen', compact: true),
-    );
-  }
 }
 
 class _CatalogLoading extends StatelessWidget {
