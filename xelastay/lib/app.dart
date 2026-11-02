@@ -5,6 +5,7 @@ import 'features/auth/domain/entities/app_user.dart';
 import 'features/auth/presentation/controllers/auth_controller.dart';
 import 'features/auth/presentation/pages/profile_page.dart';
 import 'features/auth/presentation/pages/sign_in_page.dart';
+import 'features/booking/presentation/pages/reservas_page.dart';
 import 'features/hosts/domain/usecases/create_host_stay.dart';
 import 'features/hosts/presentation/pages/create_host_stay_page.dart';
 import 'features/hosts/presentation/pages/host_dashboard_page.dart';
@@ -120,8 +121,8 @@ class _GuestAppShell extends StatefulWidget {
 }
 
 class _GuestAppShellState extends State<_GuestAppShell> {
-  // Orden de las pestañas: Explorar, Guardados, Perfil.
-  static const _perfil = 2;
+  // Orden de las pestañas: Explorar, Guardados, Reservas, Perfil.
+  static const _perfil = 3;
   int _selectedIndex = 0;
 
   @override
@@ -136,6 +137,8 @@ class _GuestAppShellState extends State<_GuestAppShell> {
         ),
         // Guardados: las listas de viaje que viven en SQLite del teléfono.
         const ListasPage(),
+        // Reservas: solicitudes y estadías de esta persona (SQLite).
+        ReservasPage(usuario: widget.user),
         ProfilePage(
           user: widget.user,
           authController: widget.authController,
@@ -156,6 +159,11 @@ class _GuestAppShellState extends State<_GuestAppShell> {
           icon: Icon(Icons.bookmark_border),
           selectedIcon: Icon(Icons.bookmark),
           label: 'Guardados',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.luggage_outlined),
+          selectedIcon: Icon(Icons.luggage),
+          label: 'Reservas',
         ),
         NavigationDestination(
           icon: Icon(Icons.person_outline),

@@ -324,7 +324,9 @@ class _StaysPageState extends State<StaysPage> {
   }
 
   void _abrirDetalle(Stay stay) => Navigator.of(context).push<void>(
-    MaterialPageRoute<void>(builder: (_) => StayDetailPage(stay: stay)),
+    MaterialPageRoute<void>(
+      builder: (_) => StayDetailPage(stay: stay, usuario: widget.user),
+    ),
   );
 }
 

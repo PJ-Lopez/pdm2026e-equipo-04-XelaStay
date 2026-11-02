@@ -1,5 +1,37 @@
 # Bitácora de uso de IA
 
+## 2026-11-02 · @Emersonx257 · Sprint 3: reservas, migración v3 y ADR-0001
+
+- **Herramienta:** Claude (asistente de código), en una sesión que coordinó
+  @gio-ld para el equipo; esta parte la revisó, probó y subió su autor.
+- **Qué se pidió:** solicitar una reserva desde el detalle del alojamiento con
+  fechas, huéspedes y desglose de precio; que no se acepten fechas que se
+  empalman; una pestaña Reservas con filtro (Pendientes, Próximas,
+  Anteriores) y el detalle de cada reserva con la opción de cancelar. La
+  migración v3 con las tablas de reservas, pagos, mensajes y reseñas, su
+  prueba y un ADR con la decisión de guardarlas en el teléfono.
+- **Qué acepté:** la revisión de fechas tomadas y el INSERT en una sola
+  transacción; `Desglose` como lógica pura en centavos; el reloj inyectable
+  (`relojProvider`) para que las pruebas no dependan del día; el `UPDATE`
+  condicionado para cancelar.
+- **Qué rechacé o corregí:**
+  - Se descartó calcular la tarifa de servicio con `double`
+    (`subtotal * 0.1`): se usan enteros con redondeo,
+    `(subtotal * 10 + 50) ~/ 100`.
+  - Se descartó bloquear también las solicitudes pendientes de otras
+    personas: nadie más podría pedir fechas que el anfitrión todavía no
+    aceptó. Quedan "en cola" y solo bloquean las aceptadas o confirmadas.
+  - Se descartó guardar las fechas como milisegundos: con la hora incluida,
+    una estadía de "dos noches" podría contar una o tres. Se guardan como
+    `AAAA-MM-DD`.
+  - Se cierra el PR #20 (`feat/filtro-reservas`): sus reservas venían de un
+    repositorio con datos escritos a mano; esta parte las reemplaza por datos
+    reales en SQLite.
+- **Verificación:** pruebas de lógica (desglose, pestañas por estado,
+  formatos), de datos con SQLite (empalmes, cola, reglas, cancelar, `CHECK`) y
+  de migración v2→v3; pruebas de widget del formulario y de la pestaña;
+  `flutter analyze` y CI en verde.
+
 ## 2026-11-02 · @PJ-Lopez · Sprint 3: detalle del alojamiento y filtros en Explorar
 
 - **Herramienta:** Claude (asistente de código).
