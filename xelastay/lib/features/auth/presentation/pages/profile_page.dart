@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/image_placeholder.dart';
+import '../../../listas/presentation/pages/listas_page.dart';
 import '../../domain/entities/app_user.dart';
 import '../controllers/auth_controller.dart';
 
@@ -80,6 +81,26 @@ class ProfilePage extends StatelessWidget {
                 value: _roleLabel(user.role),
                 showDivider: false,
               ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          _SectionCard(
+            title: 'Mis listas de viaje',
+            children: [
+              const Text(
+                'Organiza los alojamientos que te gustan. Se guardan en tu '
+                'teléfono y puedes verlos sin conexión.',
+                style: TextStyle(color: AppColors.muted, height: 1.4),
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: () => Navigator.of(context).push<void>(
+                  MaterialPageRoute<void>(builder: (_) => const ListasPage()),
+                ),
+                icon: const Icon(Icons.bookmarks_outlined),
+                label: const Text('Ver mis listas'),
+              ),
+              const SizedBox(height: 12),
             ],
           ),
           const SizedBox(height: 18),
