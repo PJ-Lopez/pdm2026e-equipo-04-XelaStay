@@ -18,6 +18,27 @@
 - **Validación humana:** pendiente; este entorno no tiene un emulador Android
   disponible para ejecutar los pasos manuales del laboratorio.
 
+## 2026-11-02 · @joshuaF14 · Sprint 3: pestañas y Guardados con las listas locales
+
+- **Herramienta:** Claude (asistente de código).
+- **Qué pedí:** barra inferior con Explorar, Guardados y Perfil, donde
+  Guardados muestre las listas de viaje guardadas en SQLite, y quitar la
+  pantalla vieja de guardados que no estaba conectada a la navegación.
+- **Qué acepté:** `ListasPage` como pestaña dentro del `IndexedStack` (conserva
+  su estado al cambiar de pestaña) y una prueba de widget que recorre las tres
+  pestañas con un repositorio en memoria.
+- **Qué rechacé o corregí:**
+  - Conservar `guardados_screen.dart`: hacía la llamada HTTP desde el provider
+    (sin pasar por repositorio) y rellenaba con datos escritos a mano cuando
+    el API no traía un campo. Se eliminó junto con `SavedStay`.
+  - Se eliminó también `StaysStatePage` con su repositorio de datos fijos: era
+    una pantalla de práctica que la app ya no usa (Explorar cubre los estados
+    de carga, vacío y error con el API).
+  - Usar el índice `1` escrito a mano para abrir Perfil: con una pestaña nueva
+    apuntaba a Guardados. Ahora es la constante `_perfil`.
+- **Verificación:** prueba de navegación entre pestañas, `flutter analyze` y
+  `flutter test` en verde.
+
 ## 2026-11-01 · @Emersonx257 · S16 parte 4: regla de borrado, archivar y alojamientos
 
 - **Herramienta:** Claude (asistente de código).
