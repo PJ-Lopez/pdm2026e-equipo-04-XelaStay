@@ -7,6 +7,7 @@ class AlojamientoGuardado {
     required this.zona,
     required this.precioCentavos,
     required this.guardadoEn,
+    required this.listaId,
   });
 
   /// Id del alojamiento en el API (`Stay.id`).
@@ -17,4 +18,7 @@ class AlojamientoGuardado {
   /// Precio por noche en centavos, como lo entrega el API.
   final int precioCentavos;
   final DateTime guardadoEn;
+
+  /// Lista de viaje a la que pertenece (desde la versión 2 de la base).
+  final int listaId;
 }

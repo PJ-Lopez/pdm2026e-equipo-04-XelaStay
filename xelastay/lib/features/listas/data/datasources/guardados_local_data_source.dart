@@ -17,8 +17,20 @@ class GuardadosLocalDataSource {
     return [for (final f in filas) _desdeFila(f)];
   }
 
+  Future<List<AlojamientoGuardado>> deLista(int listaId) async {
+    final db = await _database.database;
+    final filas = await db.query(
+      'guardados',
+      where: 'lista_id = ?',
+      whereArgs: [listaId],
+      orderBy: 'guardado_ms DESC',
+    );
+    return [for (final f in filas) _desdeFila(f)];
+  }
+
   /// Guardar dos veces el mismo alojamiento no lo duplica: `stay_id` es la
-  /// llave primaria y la segunda vez reemplaza a la primera.
+  /// llave primaria y la segunda vez reemplaza a la primera. Por eso guardarlo
+  /// en otra lista lo MUEVE a esa lista.
   Future<void> guardar(AlojamientoGuardado alojamiento) async {
     final db = await _database.database;
     await db.insert('guardados', {
@@ -27,6 +39,7 @@ class GuardadosLocalDataSource {
       'zona': alojamiento.zona,
       'precio_centavos': alojamiento.precioCentavos,
       'guardado_ms': alojamiento.guardadoEn.millisecondsSinceEpoch,
+      'lista_id': alojamiento.listaId,
     }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
@@ -41,5 +54,6 @@ class GuardadosLocalDataSource {
     zona: f['zona']! as String,
     precioCentavos: f['precio_centavos']! as int,
     guardadoEn: DateTime.fromMillisecondsSinceEpoch(f['guardado_ms']! as int),
+    listaId: f['lista_id']! as int,
   );
 }
