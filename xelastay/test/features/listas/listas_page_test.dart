@@ -87,9 +87,59 @@ void main() {
     expect(find.text('Crear lista'), findsOneWidget);
     expect(repositorio.listas, hasLength(1));
   });
+
+  testWidgets('borrar una lista en uso: mensaje claro y se ofrece archivar', (
+    tester,
+  ) async {
+    final repositorio = await abrirPantalla(tester);
+
+    await tester.tap(find.text('Favoritos'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Eliminar'));
+    await tester.pumpAndSettle();
+
+    // No se borra: el mensaje explica por qué y el formulario sigue abierto.
+    expect(
+      find.text(
+        'Tiene 2 alojamientos guardados. Archívala para dejar de verla.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('Editar lista'), findsOneWidget);
+    expect(repositorio.listas, hasLength(1));
+
+    // La otra salida: archivarla.
+    await tester.tap(find.text('Archivar'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Lista archivada'), findsOneWidget);
+    expect(find.text('Archivadas'), findsOneWidget);
+    expect(find.text('Favoritos'), findsOneWidget);
+    expect(repositorio.listas.single.archivada, isTrue);
+    expect(repositorio.listas.single.alojamientos, 2);
+  });
+
+  testWidgets('una lista sin alojamientos sí se elimina', (tester) async {
+    final repositorio = await abrirPantalla(
+      tester,
+      otras: [const Lista(id: 2, nombre: 'Trabajo')],
+    );
+
+    await tester.tap(find.text('Trabajo'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Eliminar'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Trabajo'), findsNothing);
+    expect(find.text('Lista eliminada'), findsOneWidget);
+    expect(repositorio.listas.map((l) => l.nombre), ['Favoritos']);
+  });
 }
 
-Future<ListasFalsas> abrirPantalla(WidgetTester tester) async {
+Future<ListasFalsas> abrirPantalla(
+  WidgetTester tester, {
+  List<Lista> otras = const [],
+}) async {
   final repositorio = ListasFalsas([
     const Lista(
       id: 1,
@@ -97,6 +147,7 @@ Future<ListasFalsas> abrirPantalla(WidgetTester tester) async {
       descripcion: 'Lo que quiero visitar',
       alojamientos: 2,
     ),
+    ...otras,
   ]);
   await tester.pumpWidget(
     ProviderScope(
@@ -150,6 +201,32 @@ class ListasFalsas implements ListasRepository {
       nombre: limpio,
       descripcion: descripcion,
       alojamientos: listas[i].alojamientos,
+      archivada: listas[i].archivada,
     );
+  }
+
+  @override
+  Future<void> archivar(int id, {required bool archivada}) async {
+    final i = listas.indexWhere((l) => l.id == id);
+    final l = listas[i];
+    listas[i] = Lista(
+      id: l.id,
+      nombre: l.nombre,
+      descripcion: l.descripcion,
+      alojamientos: l.alojamientos,
+      archivada: archivada,
+    );
+  }
+
+  @override
+  Future<void> eliminar(int id) async {
+    final lista = listas.singleWhere((l) => l.id == id);
+    if (lista.enUso) {
+      throw ListaException(
+        'Tiene ${lista.alojamientos} alojamientos guardados. '
+        'Archívala para dejar de verla.',
+      );
+    }
+    listas.remove(lista);
   }
 }

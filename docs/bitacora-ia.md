@@ -1,5 +1,52 @@
 # Bitácora de uso de IA
 
+## 2026-11-01 · Codex · Revisión e integración local de S16 parte 4
+
+- **Qué se solicitó:** traer los cambios de `main` y trabajar la entrega de
+  Emerson cuando la parte 3 estuviera integrada.
+- **Qué se aceptó:** aplicar el parche de Emerson sobre la rama creada desde
+  `origin/main`, y mostrar mensajes amigables si falla agregar o quitar un
+  alojamiento.
+- **Qué se descartó:** dejar las excepciones del repositorio sin manejar ni
+  mostrar mensajes técnicos al usuario.
+- **Qué se corrigió:** las escrituras desde `ListaDetallePage` no manejaban
+  fallos del repositorio; ahora el usuario recibe un mensaje y la vista evita
+  usar el estado después de desmontarse. Se añadieron pruebas widget para ambos
+  errores.
+- **Verificación automatizada:** `flutter pub get`, `dart format lib test`,
+  `flutter analyze` sin observaciones y `flutter test` con 30 pruebas aprobadas.
+- **Validación humana:** pendiente; este entorno no tiene un emulador Android
+  disponible para ejecutar los pasos manuales del laboratorio.
+
+## 2026-11-01 · @Emersonx257 · S16 parte 4: regla de borrado, archivar y alojamientos
+
+- **Herramienta:** Claude (asistente de código).
+- **Qué pedí:** que una lista con alojamientos no se pueda borrar (mensaje
+  claro y ofrecer archivar), archivar/restaurar, sección "Archivadas" y una
+  pantalla para agregar alojamientos del catálogo a una lista y quitarlos,
+  todo refrescando con `ref.invalidate`. Pruebas de las reglas con SQLite real
+  y de widget.
+- **Qué acepté:** `eliminar` que cuenta los guardados y borra en una sola
+  transacción, `archivar`, los botones "Archivar/Restaurar" y "Eliminar" en el
+  mismo formulario, `ListaDetallePage` con el catálogo vía
+  `getPublicStaysProvider` (configurado en `main.dart`) y las pruebas.
+- **Qué rechacé o corregí:**
+  - El SnackBar usaba el `context` de la fila tocada. Al archivar, la fila
+    cambia de sección y ese `context` se desmonta, así que el aviso no salía.
+    Se toma el `ScaffoldMessenger` antes de abrir el formulario.
+  - Confiar solo en la llave foránea para no borrar: el usuario vería un error
+    de SQLite. Se revisa antes, en la misma transacción que el `DELETE`, y se
+    lanza `ListaException` con un mensaje para el usuario.
+  - Sugerir "Archívala" a una lista que ya está archivada no tiene sentido: en
+    ese caso el mensaje pide quitar sus alojamientos.
+  - Que `getPublicStaysProvider` devolviera datos simulados por defecto: en
+    producción ocultaría que falta configurarlo. Por defecto lanza un error y
+    `main.dart` lo sobreescribe con el API.
+- **Verificación:** pruebas de reglas con SQLite real (en uso no se borra,
+  archivar sobrevive a cerrar y abrir), pruebas de widget del formulario y del
+  detalle, `flutter test` local y CI en verde; prueba manual en emulador
+  (borrar una lista con alojamientos, archivarla, cerrar y abrir la app).
+
 ## 2026-11-01 · @gio-ld · S16 parte 3: CRUD de listas de viaje
 
 - **Herramienta:** Claude (asistente de código).

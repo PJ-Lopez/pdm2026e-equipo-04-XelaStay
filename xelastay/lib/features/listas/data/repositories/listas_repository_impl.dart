@@ -32,4 +32,11 @@ class ListasRepositoryImpl implements ListasRepository {
       descripcion: descripcion.trim(),
     );
   }
+
+  @override
+  Future<void> archivar(int id, {required bool archivada}) =>
+      _local.archivar(id, archivada: archivada);
+
+  @override
+  Future<void> eliminar(int id) => _local.eliminar(id);
 }
