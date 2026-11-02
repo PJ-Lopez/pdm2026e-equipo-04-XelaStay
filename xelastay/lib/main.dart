@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'app.dart';
@@ -43,10 +44,13 @@ Future<void> main() async {
   final staysRepository = StaysRepositoryImpl(staysRemote);
 
   runApp(
-    XelaStayApp(
-      authController: authController,
-      createHostStay: CreateHostStay(hostsRepository),
-      getPublicStays: GetPublicStays(staysRepository),
+    // ProviderScope: guarda el estado de los providers (listas de viaje).
+    ProviderScope(
+      child: XelaStayApp(
+        authController: authController,
+        createHostStay: CreateHostStay(hostsRepository),
+        getPublicStays: GetPublicStays(staysRepository),
+      ),
     ),
   );
 }

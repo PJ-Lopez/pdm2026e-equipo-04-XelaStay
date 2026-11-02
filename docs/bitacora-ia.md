@@ -1,5 +1,32 @@
 # Bitácora de uso de IA
 
+## 2026-11-01 · @gio-ld · S16 parte 3: CRUD de listas de viaje
+
+- **Herramienta:** Claude (asistente de código).
+- **Qué pedí:** CRUD de la entidad `Lista` con capas (entidad, contrato del
+  repositorio, datasource SQLite, implementación, providers), una pantalla con
+  la lista y un solo formulario que crea y edita. El formulario recibe el
+  registro inicial y la función para guardar, sin SQL ni providers. Después de
+  guardar, refrescar invalidando el provider. Entrada desde "Mi perfil".
+- **Qué acepté:** `ListaForm` con `DatosLista`, `abrirFormularioLista` que
+  invalida `listasProvider`, el `LEFT JOIN` para contar alojamientos, la
+  traducción del error UNIQUE a un mensaje para el usuario y las pruebas con
+  repositorio falso (`overrideWithValue`) y con SQLite real.
+- **Qué rechacé o corregí:**
+  - Agregar la lista nueva a mano al estado de la pantalla después de guardar:
+    se rechazó, se invalida el provider para que lo visible sea lo guardado.
+    La prueba lo comprueba contando las lecturas del repositorio.
+  - Abrir la lista desde una pestaña nueva del menú inferior: se dejó en "Mi
+    perfil" para no tocar la navegación que cambia `feat/filtro-reservas`.
+  - Copiar la validación de inkash tal cual (un `throw` en un método sin
+    `async` lanza el error antes de devolver el `Future`). Se hizo `async`
+    para que el formulario y `expectLater(..., throwsA(...))` lo reciban
+    siempre como un `Future` con error.
+- **Verificación:** prueba de widget (tocar una lista abre el formulario lleno
+  y "Guardar cambios" la actualiza conservando el id), pruebas del repositorio
+  con SQLite, `flutter test` local y CI en verde; prueba manual en emulador
+  (crear, editar, cerrar y volver a abrir la app).
+
 ## 2026-11-01 · @joshuaF14 · S16 parte 2: migración v2 (listas de viaje)
 
 - **Herramienta:** Claude (asistente de código).
