@@ -147,7 +147,7 @@ void main() {
     expect(find.text('Cabaña con vista a las montañas'), findsOneWidget);
   });
 
-  testWidgets('Tocar una tarjeta abre el detalle del alojamiento', (  
+  testWidgets('Tocar una tarjeta abre el detalle del alojamiento', (
     tester,
   ) async {
     await _pumpPage(
