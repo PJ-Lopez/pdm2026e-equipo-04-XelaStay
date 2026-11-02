@@ -1,8 +1,0 @@
-feat(db): migración v2 con listas de viaje y prueba desde v1
-
-- Tabla listas (nombre único sin importar mayúsculas, archivada)
-- guardados.lista_id con llave foránea; los guardados viejos pasan a Favoritos
-- La migración 1 no se toca: el cambio va en una versión nueva (onUpgrade)
-- Prueba: base v1 con datos abierta con la versión nueva conserva todo
-- Prueba: instalación nueva y actualizada tienen el mismo esquema
-
