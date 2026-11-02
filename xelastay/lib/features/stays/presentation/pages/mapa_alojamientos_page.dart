@@ -72,11 +72,12 @@ class _MapaAlojamientosPageState extends State<MapaAlojamientosPage> {
               ),
               // La licencia de OpenStreetMap pide mostrar el crédito.
               RichAttributionWidget(
-  attributions: [
-    TextSourceAttribution('OpenStreetMap contributors'),
-  ],
-)
-        ]),
+                attributions: [
+                  TextSourceAttribution('OpenStreetMap contributors'),
+                ],
+              ),
+            ],
+          ),
           if (conUbicacion.isEmpty || sinUbicacion > 0)
             Positioned(
               top: 12,
