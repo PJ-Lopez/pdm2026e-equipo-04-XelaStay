@@ -3,7 +3,7 @@ import 'package:sqflite/sqflite.dart';
 /// Base de datos local de XelaStay (SQLite).
 ///
 /// Guarda en el teléfono lo que el huésped quiere tener a mano aunque no haya
-/// conexión: los alojamientos que guardó.
+/// conexión: sus listas de viaje y los alojamientos que guardó en ellas.
 class AppDatabase {
   AppDatabase({this.factory, this.path = 'xelastay.db'});
 
@@ -18,6 +18,7 @@ class AppDatabase {
   /// Regla de oro: una migración publicada NO se edita; se agrega otra.
   static final Map<int, Future<void> Function(Database db)> migraciones = {
     1: _v1Guardados,
+    2: _v2Listas,
   };
 
   static int get versionActual => migraciones.length;
@@ -76,6 +77,45 @@ class AppDatabase {
         guardado_ms INTEGER NOT NULL
       )
     ''');
+  }
+
+  // v2 (S16): listas de viaje ("Fin de semana en Xela", "Con mis papás"...).
+  // Cada guardado pasa a pertenecer a una lista.
+  static Future<void> _v2Listas(Database db) async {
+    // COLLATE NOCASE: "Favoritos" y "favoritos" cuentan como el mismo nombre.
+    // archivada: una lista en uso no se borra, se archiva para dejar de verla.
+    await db.execute('''
+      CREATE TABLE listas (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nombre TEXT NOT NULL COLLATE NOCASE UNIQUE
+          CHECK (length(trim(nombre)) > 0),
+        descripcion TEXT NOT NULL DEFAULT '',
+        archivada INTEGER NOT NULL DEFAULT 0 CHECK (archivada IN (0, 1)),
+        creada_ms INTEGER NOT NULL
+      )
+    ''');
+    // El nombre va ESCRITO AQUÍ y no importado de la app: una migración es
+    // una foto del pasado y no debe cambiar si el código cambia.
+    await db.execute('''
+      INSERT INTO listas (nombre, creada_ms)
+      VALUES ('Favoritos', CAST(strftime('%s', 'now') AS INTEGER) * 1000)
+    ''');
+    // ALTER TABLE solo puede AGREGAR columnas, y con llave foránea la nueva
+    // tiene que aceptar NULL: los guardados viejos todavía no tienen lista.
+    // Sin ON DELETE: la base no deja borrar una lista que tiene guardados.
+    await db.execute('''
+      ALTER TABLE guardados
+      ADD COLUMN lista_id INTEGER REFERENCES listas (id)
+    ''');
+    // Los guardados que el usuario ya tenía quedan en "Favoritos": no se
+    // pierden ni quedan huérfanos.
+    await db.execute('''
+      UPDATE guardados
+      SET lista_id = (SELECT id FROM listas WHERE nombre = 'Favoritos')
+    ''');
+    await db.execute(
+      'CREATE INDEX idx_guardados_lista_id ON guardados (lista_id)',
+    );
   }
 
   Future<void> close() async {

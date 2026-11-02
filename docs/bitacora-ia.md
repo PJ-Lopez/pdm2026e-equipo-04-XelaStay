@@ -1,5 +1,28 @@
 # Bitácora de uso de IA
 
+## 2026-11-01 · @joshuaF14 · S16 parte 2: migración v2 (listas de viaje)
+
+- **Herramienta:** Claude (asistente de código).
+- **Qué pedí:** agregar la versión 2 de la base con la tabla `listas` y la
+  columna `guardados.lista_id`, sin tocar la migración 1 que ya está en
+  `main`, más la prueba que abre una base v1 con datos usando la versión
+  nueva (como `app_database_test` de inkash).
+- **Qué acepté:** `_v2Listas` con `COLLATE NOCASE UNIQUE` en el nombre, la
+  columna `archivada`, la lista "Favoritos" creada por la migración, el
+  `UPDATE` que mete ahí los guardados viejos y las pruebas de migración y de
+  "mismo esquema en instalación nueva y actualizada".
+- **Qué rechacé o corregí:**
+  - Agregar `lista_id` como `NOT NULL`: `ALTER TABLE ... ADD COLUMN` con
+    `REFERENCES` no lo permite sin un `DEFAULT`, y no hay un id fijo que poner.
+    Se dejó nullable y se llenó con el `UPDATE` en la misma migración.
+  - Insertar "Favoritos" usando una constante de la app: la migración debe ser
+    una foto fija del pasado, así que el nombre va escrito en el SQL.
+  - La prueba de migración no inserta los datos v1 con el datasource (que ya
+    escribe `lista_id`), sino con las columnas exactas de la versión 1.
+- **Verificación:** las reglas de la base (UNIQUE sin importar mayúsculas,
+  `CHECK`, llave foránea) se probaron en SQLite real con `sqflite_common_ffi`;
+  `flutter test` local y CI en verde.
+
 ## 2026-11-01 · @PJ-Lopez · S16 parte 1: base local SQLite (v1)
 
 - **Herramienta:** Claude (asistente de código).
