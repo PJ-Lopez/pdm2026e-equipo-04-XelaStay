@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../../../auth/domain/entities/app_user.dart';
+import '../../../booking/presentation/pages/solicitar_reserva_page.dart';
 import '../../../listas/domain/entities/alojamiento_guardado.dart';
 import '../../../listas/domain/entities/lista.dart';
 import '../../../listas/presentation/pages/listas_page.dart';
@@ -11,11 +13,14 @@ import '../../domain/entities/stay.dart';
 import '../widgets/stay_photo.dart';
 
 /// Detalle de un alojamiento del catálogo. Los datos llegan del API en la
-/// lista de Explorar; aquí solo se muestran y se pueden guardar en una lista.
+/// lista de Explorar; desde aquí se guarda en una lista o se pide reserva.
 class StayDetailPage extends ConsumerWidget {
-  const StayDetailPage({super.key, required this.stay});
+  const StayDetailPage({super.key, required this.stay, required this.usuario});
 
   final Stay stay;
+
+  /// Quién está usando la app: la solicitud de reserva va a su nombre.
+  final AppUser usuario;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => Scaffold(
@@ -63,38 +68,64 @@ class StayDetailPage extends ConsumerWidget {
           color: AppColors.surface,
           border: Border(top: BorderSide(color: AppColors.line)),
         ),
-        child: Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Expanded(
-              child: Text.rich(
-                TextSpan(
-                  children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text.rich(
                     TextSpan(
-                      text: precioPorNoche(stay),
-                      style: const TextStyle(
-                        color: AppColors.ink,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 18,
-                      ),
+                      children: [
+                        TextSpan(
+                          text: precioPorNoche(stay),
+                          style: const TextStyle(
+                            color: AppColors.ink,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 18,
+                          ),
+                        ),
+                        const TextSpan(
+                          text: ' / noche',
+                          style: TextStyle(color: AppColors.muted),
+                        ),
+                      ],
                     ),
-                    const TextSpan(
-                      text: ' / noche',
-                      style: TextStyle(color: AppColors.muted),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
+                OutlinedButton.icon(
+                  onPressed: () => _guardarEnLista(context, ref),
+                  icon: const Icon(Icons.bookmark_add_outlined),
+                  label: const Text('Guardar'),
+                ),
+              ],
             ),
-            OutlinedButton.icon(
-              onPressed: () => _guardarEnLista(context, ref),
-              icon: const Icon(Icons.bookmark_add_outlined),
-              label: const Text('Guardar'),
+            const SizedBox(height: 10),
+            FilledButton(
+              onPressed: () => _solicitarReserva(context),
+              child: const Text('Solicitar reserva'),
             ),
           ],
         ),
       ),
     ),
   );
+
+  Future<void> _solicitarReserva(BuildContext context) async {
+    final avisos = ScaffoldMessenger.of(context);
+    final enviada = await Navigator.of(context).push<bool>(
+      MaterialPageRoute<bool>(
+        builder: (_) => SolicitarReservaPage(stay: stay, usuario: usuario),
+      ),
+    );
+    if (enviada == true) {
+      avisos.showSnackBar(
+        const SnackBar(
+          content: Text('Solicitud enviada. Síguela en la pestaña Reservas.'),
+        ),
+      );
+    }
+  }
 
   /// Guarda el alojamiento en la lista que elija el usuario. Después se
   /// invalidan los providers para que Guardados muestre lo que quedó en la

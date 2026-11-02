@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:xelastay/core/theme/app_theme.dart';
+import 'package:xelastay/features/auth/domain/entities/app_user.dart';
 import 'package:xelastay/features/listas/domain/entities/alojamiento_guardado.dart';
 import 'package:xelastay/features/listas/domain/entities/lista.dart';
 import 'package:xelastay/features/listas/domain/repositories/guardados_repository.dart';
@@ -46,6 +47,18 @@ void main() {
     expect(guardados.datos.single.precioCentavos, 25000);
   });
 
+  testWidgets('"Solicitar reserva" abre el formulario de la reserva', (
+    tester,
+  ) async {
+    await _abrir(tester, _GuardadosFalsos());
+
+    await tester.tap(find.text('Solicitar reserva'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Elegir fechas'), findsOneWidget);
+    expect(find.text('Máximo 2'), findsOneWidget);
+  });
+
   testWidgets('si falla al guardar muestra un mensaje amigable', (
     tester,
   ) async {
@@ -79,6 +92,13 @@ const _stay = Stay(
   verificationStatus: 'verified',
 );
 
+const _usuario = AppUser(
+  id: 'u1',
+  name: 'Ana López',
+  email: 'ana@example.com',
+  role: AppRole.guest,
+);
+
 Future<void> _abrir(WidgetTester tester, _GuardadosFalsos guardados) async {
   // Pantalla de teléfono: así toda la ficha cabe y se construye.
   tester.view.physicalSize = const Size(390, 1400);
@@ -93,7 +113,7 @@ Future<void> _abrir(WidgetTester tester, _GuardadosFalsos guardados) async {
       ],
       child: MaterialApp(
         theme: buildAppTheme(),
-        home: const StayDetailPage(stay: _stay),
+        home: const StayDetailPage(stay: _stay, usuario: _usuario),
       ),
     ),
   );

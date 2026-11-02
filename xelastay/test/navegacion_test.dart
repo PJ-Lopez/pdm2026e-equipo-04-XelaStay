@@ -9,6 +9,9 @@ import 'package:xelastay/features/auth/domain/usecases/restore_session.dart';
 import 'package:xelastay/features/auth/domain/usecases/sign_in.dart';
 import 'package:xelastay/features/auth/domain/usecases/sign_out.dart';
 import 'package:xelastay/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:xelastay/features/booking/domain/entities/reserva.dart';
+import 'package:xelastay/features/booking/domain/repositories/reservas_repository.dart';
+import 'package:xelastay/features/booking/presentation/providers/reservas_providers.dart';
 import 'package:xelastay/features/hosts/domain/entities/host_stay.dart';
 import 'package:xelastay/features/hosts/domain/repositories/hosts_repository.dart';
 import 'package:xelastay/features/hosts/domain/usecases/create_host_stay.dart';
@@ -20,7 +23,7 @@ import 'package:xelastay/features/stays/domain/repositories/stays_repository.dar
 import 'package:xelastay/features/stays/domain/usecases/get_public_stays.dart';
 
 void main() {
-  testWidgets('las pestañas llevan a Explorar, Guardados y Perfil', (
+  testWidgets('las pestañas llevan a Explorar, Guardados, Reservas y Perfil', (
     tester,
   ) async {
     final auth = _AuthRepository();
@@ -34,8 +37,12 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        // Guardados usa un repositorio en memoria: la prueba no abre SQLite.
-        overrides: [listasRepositoryProvider.overrideWithValue(_Listas())],
+        // Guardados y Reservas usan repositorios en memoria: la prueba no
+        // abre SQLite.
+        overrides: [
+          listasRepositoryProvider.overrideWithValue(_Listas()),
+          reservasRepositoryProvider.overrideWithValue(_Reservas()),
+        ],
         child: XelaStayApp(
           authController: controller,
           createHostStay: CreateHostStay(_HostsRepository()),
@@ -53,6 +60,11 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Mis listas de viaje'), findsOneWidget);
     expect(find.text('Favoritos'), findsOneWidget);
+
+    await tester.tap(find.text('Reservas'));
+    await tester.pumpAndSettle();
+    expect(find.text('Mis reservas'), findsOneWidget);
+    expect(find.text('No tienes solicitudes pendientes'), findsOneWidget);
 
     await tester.tap(find.text('Perfil'));
     await tester.pumpAndSettle();
@@ -103,6 +115,21 @@ class _HostsRepository implements HostsRepository {
 class _StaysRepository implements StaysRepository {
   @override
   Future<List<Stay>> getPublicStays() async => const [];
+}
+
+class _Reservas implements ReservasRepository {
+  @override
+  Future<List<Reserva>> delHuesped(String huespedId) async => const [];
+
+  @override
+  Future<Reserva> porId(int id) => throw UnimplementedError();
+
+  @override
+  Future<Reserva> solicitar(SolicitudReserva solicitud) =>
+      throw UnimplementedError();
+
+  @override
+  Future<void> cancelar(int id) async {}
 }
 
 class _Listas implements ListasRepository {

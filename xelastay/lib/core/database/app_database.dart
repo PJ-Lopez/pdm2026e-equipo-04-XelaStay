@@ -4,6 +4,8 @@ import 'package:sqflite/sqflite.dart';
 ///
 /// Guarda en el teléfono lo que el huésped quiere tener a mano aunque no haya
 /// conexión: sus listas de viaje y los alojamientos que guardó en ellas.
+/// Desde la versión 3 también guarda reservas, pagos, mensajes y reseñas
+/// (ver docs/adr/0001-reservas-en-sqlite-local.md).
 class AppDatabase {
   AppDatabase({this.factory, this.path = 'xelastay.db'});
 
@@ -19,6 +21,7 @@ class AppDatabase {
   static final Map<int, Future<void> Function(Database db)> migraciones = {
     1: _v1Guardados,
     2: _v2Listas,
+    3: _v3Reservas,
   };
 
   static int get versionActual => migraciones.length;
@@ -116,6 +119,81 @@ class AppDatabase {
     await db.execute(
       'CREATE INDEX idx_guardados_lista_id ON guardados (lista_id)',
     );
+  }
+
+  // v3 (Sprint 3): reservas y todo lo que cuelga de una reserva.
+  // Van juntas en una sola versión porque ninguna tiene sentido sin la reserva
+  // (FOREIGN KEY): pago, mensajes del chat y reseña.
+  static Future<void> _v3Reservas(Database db) async {
+    // Las fechas van como texto 'AAAA-MM-DD': ordenan igual que las fechas,
+    // así que "se empalman" es entrada < otra_salida AND salida > otra_entrada.
+    await db.execute('''
+      CREATE TABLE reservas (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        stay_id TEXT NOT NULL,
+        titulo TEXT NOT NULL,
+        zona TEXT NOT NULL,
+        precio_noche_centavos INTEGER NOT NULL
+          CHECK (precio_noche_centavos >= 0),
+        entrada TEXT NOT NULL,
+        salida TEXT NOT NULL,
+        huespedes INTEGER NOT NULL CHECK (huespedes > 0),
+        huesped_id TEXT NOT NULL,
+        huesped_nombre TEXT NOT NULL,
+        estado TEXT NOT NULL DEFAULT 'pendiente' CHECK (estado IN (
+          'pendiente', 'aceptada', 'confirmada',
+          'rechazada', 'cancelada', 'completada'
+        )),
+        creada_ms INTEGER NOT NULL,
+        CHECK (salida > entrada)
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX idx_reservas_stay ON reservas (stay_id, entrada, salida)',
+    );
+    await db.execute(
+      'CREATE INDEX idx_reservas_huesped ON reservas (huesped_id)',
+    );
+    // Un pago por reserva (UNIQUE). El total se comprueba en la base.
+    await db.execute('''
+      CREATE TABLE pagos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        reserva_id INTEGER NOT NULL UNIQUE REFERENCES reservas (id),
+        metodo TEXT NOT NULL
+          CHECK (metodo IN ('tarjeta', 'transferencia', 'efectivo')),
+        subtotal_centavos INTEGER NOT NULL CHECK (subtotal_centavos >= 0),
+        servicio_centavos INTEGER NOT NULL CHECK (servicio_centavos >= 0),
+        total_centavos INTEGER NOT NULL
+          CHECK (total_centavos = subtotal_centavos + servicio_centavos),
+        referencia TEXT NOT NULL UNIQUE,
+        pagado_ms INTEGER NOT NULL
+      )
+    ''');
+    await db.execute('''
+      CREATE TABLE mensajes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        reserva_id INTEGER NOT NULL REFERENCES reservas (id),
+        autor TEXT NOT NULL CHECK (autor IN ('huesped', 'anfitrion')),
+        texto TEXT NOT NULL CHECK (length(trim(texto)) > 0),
+        enviado_ms INTEGER NOT NULL
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX idx_mensajes_reserva ON mensajes (reserva_id, enviado_ms)',
+    );
+    // Una reseña por reserva: solo opina quien se hospedó (UNIQUE + FK).
+    await db.execute('''
+      CREATE TABLE resenas (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        reserva_id INTEGER NOT NULL UNIQUE REFERENCES reservas (id),
+        stay_id TEXT NOT NULL,
+        autor TEXT NOT NULL,
+        estrellas INTEGER NOT NULL CHECK (estrellas BETWEEN 1 AND 5),
+        comentario TEXT NOT NULL DEFAULT '',
+        creada_ms INTEGER NOT NULL
+      )
+    ''');
+    await db.execute('CREATE INDEX idx_resenas_stay ON resenas (stay_id)');
   }
 
   Future<void> close() async {

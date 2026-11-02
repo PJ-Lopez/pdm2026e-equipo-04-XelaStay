@@ -169,6 +169,66 @@ void main() {
     await actualizada.close();
   });
 
+  // Base EXACTAMENTE como la dejaba la versión 2 (lab S16), con una lista
+  // creada por el usuario y un alojamiento guardado en ella.
+  Future<String> crearBaseV2() async {
+    final ruta = '${carpeta.path}/v2.db';
+    final v2 = await databaseFactoryFfi.openDatabase(
+      ruta,
+      options: OpenDatabaseOptions(
+        version: 2,
+        onConfigure: (db) => db.execute('PRAGMA foreign_keys = ON'),
+        onCreate: (db, _) async {
+          await AppDatabase.migraciones[1]!(db);
+          await AppDatabase.migraciones[2]!(db);
+        },
+      ),
+    );
+    final finde = await v2.insert('listas', {
+      'nombre': 'Fin de semana',
+      'creada_ms': 0,
+    });
+    await v2.insert('guardados', {
+      'stay_id': 'demo-cabana',
+      'titulo': 'Cabaña con vista a las montañas',
+      'zona': 'Las afueras de Xela',
+      'precio_centavos': 45000,
+      'guardado_ms': 0,
+      'lista_id': finde,
+    });
+    await v2.close();
+    return ruta;
+  }
+
+  test(
+    'migra de la versión 2 a la 3: listas intactas y reservas nuevas',
+    () async {
+      final actualizada = AppDatabase(
+        factory: databaseFactoryFfi,
+        path: await crearBaseV2(),
+      );
+      final db = await actualizada.database;
+      expect(await db.getVersion(), AppDatabase.versionActual);
+
+      // Lo viejo sigue.
+      final filas = await db.rawQuery('''
+      SELECT l.nombre, g.titulo FROM guardados g
+      JOIN listas l ON l.id = g.lista_id
+    ''');
+      expect(filas, [
+        {
+          'nombre': 'Fin de semana',
+          'titulo': 'Cabaña con vista a las montañas',
+        },
+      ]);
+      // Lo nuevo existe y está vacío.
+      for (final tabla in ['reservas', 'pagos', 'mensajes', 'resenas']) {
+        expect(await db.query(tabla), isEmpty, reason: tabla);
+      }
+      await actualizada.close();
+    },
+  );
+
   // Si onCreate y onUpgrade divergen, un usuario nuevo y uno actualizado
   // tendrían bases distintas. Esta prueba lo detecta comparando el esquema.
   test('instalación nueva y actualizada tienen el mismo esquema', () async {
