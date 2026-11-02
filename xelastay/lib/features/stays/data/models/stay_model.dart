@@ -15,6 +15,8 @@ class StayModel extends Stay {
     required super.verificationStatus,
     super.coverPhotoUrl,
     super.isFavorite,
+    super.latitud,
+    super.longitud,
   });
 
   factory StayModel.fromJson(Map<String, dynamic> json) {
@@ -36,7 +38,34 @@ class StayModel extends Stay {
       verificationStatus: json['verificationStatus']?.toString() ?? 'pending',
       coverPhotoUrl: photoUrl == null || photoUrl.isEmpty ? null : photoUrl,
       isFavorite: json['isFavorite'] == true,
+      latitud: _coordenada(json, location, 'latitude', 'lat'),
+      longitud: _coordenada(json, location, 'longitude', 'lng'),
     );
+  }
+
+  /// Acepta `location.latitude`, `location.lat`, `location.coordinates.*`
+  /// o el campo en la raíz. Si no viene o no es un número, queda en null.
+  static double? _coordenada(
+    Map<String, dynamic> json,
+    Map<String, dynamic> location,
+    String nombre,
+    String corto,
+  ) {
+    final coordenadas = _map(location['coordinates']);
+    for (final valor in [
+      location[nombre],
+      location[corto],
+      coordenadas[nombre],
+      coordenadas[corto],
+      json[nombre],
+      json[corto],
+    ]) {
+      final numero = valor is num
+          ? valor.toDouble()
+          : double.tryParse(valor?.toString() ?? '');
+      if (numero != null) return numero;
+    }
+    return null;
   }
 
   static Map<String, dynamic> _map(Object? value) =>

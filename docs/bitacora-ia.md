@@ -1,5 +1,30 @@
 # Bitácora de uso de IA
 
+## 2026-11-02 · @joshuaF14 · Sprint 3: mapa de alojamientos con OpenStreetMap y ADR-0002
+
+- **Herramienta:** Claude (asistente de código), en una sesión que coordinó
+  @gio-ld para el equipo; esta parte la revisó, probó y subió su autor.
+- **Qué se pidió:** ver los alojamientos de Explorar en un mapa de Xela con pines
+  de precio; al tocar un pin, una tarjeta con el alojamiento y un botón al
+  detalle. Sin llave de Google, porque la rúbrica prohíbe subir claves.
+- **Qué acepté:** `flutter_map` con teselas de OpenStreetMap y su crédito;
+  coordenadas opcionales en `Stay` (`latitud` y `longitud`); `StayModel`
+  que acepta varias formas de mandar las coordenadas desde el API;
+  `centroDelMapa` como lógica pura; la capa de teselas reemplazable para las
+  pruebas.
+- **Qué rechacé o corregí:**
+  - Se descartó poner en el centro de Xela los alojamientos que no traen
+    coordenadas: sería mostrar una ubicación inventada. No tienen pin y el
+    mapa avisa.
+  - Se descartó meter el mapa dentro del `ListView` de Explorar: el arrastre
+    del mapa competiría con el scroll de la lista. Se abre como pantalla
+    aparte con la lista ya filtrada.
+  - Se descartó probar el mapa con las teselas reales: en las pruebas de
+    Flutter no hay internet. La prueba pasa `capaDeMapa: SizedBox.shrink()`.
+- **Verificación:** pruebas de lógica (centro del mapa, lectura de
+  coordenadas del API), prueba de widget (pines, tarjeta, detalle y aviso de
+  alojamientos sin ubicación), `flutter analyze` y CI en verde.
+
 ## 2026-11-02 · @Emersonx257 · Sprint 3: reservas, migración v3 y ADR-0001
 
 - **Herramienta:** Claude (asistente de código), en una sesión que coordinó
