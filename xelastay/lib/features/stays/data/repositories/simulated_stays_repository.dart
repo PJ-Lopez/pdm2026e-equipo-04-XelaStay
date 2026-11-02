@@ -32,6 +32,8 @@ class SimulatedStaysRepository implements StaysRepository {
           zone: 'Zona 1',
           reference: 'Cerca del Parque Central',
           verificationStatus: 'verified',
+          latitud: 14.8347,
+          longitud: -91.5180,
         ),
         Stay(
           id: 'demo-cabana',
@@ -45,6 +47,8 @@ class SimulatedStaysRepository implements StaysRepository {
           zone: 'Las afueras de Xela',
           reference: 'Camino a las montañas',
           verificationStatus: 'pending',
+          latitud: 14.8165,
+          longitud: -91.5030,
         ),
       ],
     };

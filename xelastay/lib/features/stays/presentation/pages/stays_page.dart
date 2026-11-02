@@ -7,6 +7,7 @@ import '../../domain/entities/stay.dart';
 import '../../domain/filtros_catalogo.dart';
 import '../../domain/usecases/get_public_stays.dart';
 import '../widgets/stay_photo.dart';
+import 'mapa_alojamientos_page.dart';
 import 'stay_detail_page.dart';
 
 class StaysPage extends StatefulWidget {
@@ -251,13 +252,28 @@ class _StaysPageState extends State<StaysPage> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (_hayFiltros) ...[
-                      Text(
-                        '${stays.length} de ${allStays.length} alojamientos',
-                        style: const TextStyle(color: AppColors.muted),
-                      ),
-                      const SizedBox(height: 12),
-                    ],
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            _hayFiltros
+                                ? '${stays.length} de ${allStays.length} '
+                                      'alojamientos'
+                                : stays.length == 1
+                                ? '1 alojamiento'
+                                : '${stays.length} alojamientos',
+                            style: const TextStyle(color: AppColors.muted),
+                          ),
+                        ),
+                        // El mapa recibe la lista ya filtrada.
+                        TextButton.icon(
+                          onPressed: () => _abrirMapa(stays),
+                          icon: const Icon(Icons.map_outlined),
+                          label: const Text('Ver en el mapa'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
                     for (final stay in stays) ...[
                       _StayCard(stay: stay, onTap: () => _abrirDetalle(stay)),
                       const SizedBox(height: 16),
@@ -322,6 +338,12 @@ class _StaysPageState extends State<StaysPage> {
     _searchController.clear();
     setState(() => _filtros = const FiltrosCatalogo());
   }
+
+  void _abrirMapa(List<Stay> stays) => Navigator.of(context).push<void>(
+    MaterialPageRoute<void>(
+      builder: (_) => MapaAlojamientosPage(stays: stays, usuario: widget.user),
+    ),
+  );
 
   void _abrirDetalle(Stay stay) => Navigator.of(context).push<void>(
     MaterialPageRoute<void>(

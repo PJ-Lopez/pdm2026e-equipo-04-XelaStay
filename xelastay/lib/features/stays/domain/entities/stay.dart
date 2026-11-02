@@ -13,6 +13,8 @@ class Stay {
     required this.verificationStatus,
     this.coverPhotoUrl,
     this.isFavorite = false,
+    this.latitud,
+    this.longitud,
   });
 
   final String id;
@@ -28,6 +30,13 @@ class Stay {
   final String verificationStatus;
   final String? coverPhotoUrl;
   final bool isFavorite;
+
+  /// Coordenadas para el mapa. Pueden faltar: entonces el alojamiento sale
+  /// en la lista pero no en el mapa (no se inventa una ubicación).
+  final double? latitud;
+  final double? longitud;
+
+  bool get tieneUbicacion => latitud != null && longitud != null;
 
   double get priceInCurrency => priceAmount / 100;
   bool get isVerified => verificationStatus == 'verified';
