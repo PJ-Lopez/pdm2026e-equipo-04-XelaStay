@@ -1,5 +1,25 @@
 # Bitácora de uso de IA
 
+## 2026-11-02 · @PJ-Lopez · Sprint 3: detalle del alojamiento y filtros en Explorar
+
+- **Herramienta:** Claude (asistente de código).
+- **Qué pedí:** que las tarjetas de Explorar abran un detalle del alojamiento
+  con verificación explicada, calificación sin inventar promedios y un botón
+  para guardarlo en una lista de viaje. Además, chips de filtro en el listado
+  (verificados, hasta Q 300, para 3 o más) combinados con la búsqueda.
+- **Qué acepté:** `FiltrosCatalogo` como lógica pura fuera del widget (se
+  prueba sin Flutter), `StayDetailPage` con la hoja "Guardar en…" que solo
+  ofrece listas activas, y `StayPhoto` como widget compartido.
+- **Qué rechacé o corregí:**
+  - Filtrar dentro de `build` con condiciones sueltas: se movió a
+    `FiltrosCatalogo` para probar las reglas con pruebas de lógica.
+  - Mostrar "0.0" cuando no hay reseñas: se cambió por "Aún sin reseñas".
+  - Usar `ref` después del `await` sin revisar `context.mounted`: si el
+    usuario sale antes de que termine el guardado, la app fallaba.
+- **Verificación:** pruebas de lógica de filtros, pruebas de widget (chips,
+  "Quitar filtros", tocar tarjeta abre el detalle, guardar en lista y error al
+  guardar), `flutter analyze` y CI en verde.
+
 ## 2026-11-01 · Codex · Revisión e integración local de S16 parte 4
 
 - **Qué se solicitó:** traer los cambios de `main` y trabajar la entrega de
