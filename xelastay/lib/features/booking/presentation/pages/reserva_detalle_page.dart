@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/formatos.dart';
+import '../../../chat/domain/entities/mensaje.dart';
+import '../../../chat/presentation/pages/chat_page.dart';
 import '../../../pagos/domain/entities/pago.dart';
 import '../../../pagos/presentation/pages/pago_page.dart';
 import '../../../pagos/presentation/widgets/comprobante_card.dart';
@@ -22,8 +24,26 @@ class ReservaDetallePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final reserva = ref.watch(reservaPorIdProvider(reservaId));
+    final cargada = reserva.value;
     return Scaffold(
-      appBar: AppBar(title: const Text('Reserva')),
+      appBar: AppBar(
+        title: const Text('Reserva'),
+        actions: [
+          if (cargada != null)
+            IconButton(
+              tooltip: 'Chat con el anfitrión',
+              icon: const Icon(Icons.chat_bubble_outline),
+              onPressed: () => Navigator.of(context).push<void>(
+                MaterialPageRoute<void>(
+                  builder: (_) => ChatPage(
+                    reserva: cargada,
+                    comoAutor: AutorMensaje.huesped,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
       body: reserva.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => Center(

@@ -6,6 +6,8 @@ import '../../../../core/utils/formatos.dart';
 import '../../../booking/domain/entities/reserva.dart';
 import '../../../booking/presentation/providers/reservas_providers.dart';
 import '../../../booking/presentation/widgets/estado_reserva_chip.dart';
+import '../../../chat/domain/entities/mensaje.dart';
+import '../../../chat/presentation/pages/chat_page.dart';
 
 /// Pestañas del panel del anfitrión.
 enum FiltroSolicitudes { porAtender, aceptadas, cerradas }
@@ -145,7 +147,31 @@ class _SolicitudesPageState extends ConsumerState<SolicitudesPage> {
               style: const TextStyle(color: AppColors.muted),
             ),
             const SizedBox(height: 10),
-            EstadoReservaChip(estado: r.estado),
+            // Wrap y no Row: si el estado es largo o la pantalla es angosta,
+            // el botón de chat baja de línea en vez de desbordarse.
+            SizedBox(
+              width: double.infinity,
+              child: Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 8,
+                children: [
+                  EstadoReservaChip(estado: r.estado),
+                  TextButton.icon(
+                    onPressed: () => Navigator.of(context).push<void>(
+                      MaterialPageRoute<void>(
+                        builder: (_) => ChatPage(
+                          reserva: r,
+                          comoAutor: AutorMensaje.anfitrion,
+                        ),
+                      ),
+                    ),
+                    icon: const Icon(Icons.chat_bubble_outline, size: 18),
+                    label: const Text('Chat'),
+                  ),
+                ],
+              ),
+            ),
             if (r.estado == EstadoReserva.pendiente) ...[
               const SizedBox(height: 12),
               Row(

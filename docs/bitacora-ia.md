@@ -1,5 +1,33 @@
 # Bitácora de uso de IA
 
+## 2026-11-02 · @gio-ld · Sprint 3: chat entre huésped y anfitrión
+
+- **Herramienta:** Claude (asistente de código), en una sesión que coordinó
+  @gio-ld para el equipo; esta parte la revisó, probó y subió su autor.
+- **Qué se pidió:** un chat por reserva para que huésped y anfitrión se pongan
+  de acuerdo (hora de llegada, llaves, dudas). El huésped lo abre desde el
+  detalle de su reserva y el anfitrión desde Solicitudes de reserva.
+- **Qué acepté:** la tabla `mensajes` que ya traía la migración v3;
+  `ChatLocalDataSource.enviar` en una transacción que revisa que la reserva
+  exista y siga abierta; `ChatRepositoryImpl` que recorta espacios y pone un
+  máximo de 500 caracteres; `ChatPage` con el autor y la hora en cada mensaje,
+  y vacío, error con *Reintentar* y modo solo lectura.
+- **Qué rechacé o corregí:**
+  - Se descartó un chat en tiempo real con servidor (WebSocket o Firebase):
+    necesita backend y llaves que no van en el repo. Por ADR-0001 los
+    mensajes viven en SQLite del teléfono, y así se explica en la demo.
+  - Se descartó borrar el texto al tocar *Enviar*: si falla, el mensaje se
+    perdería. Se borra solo cuando ya se guardó.
+  - Bloquear el chat de una reserva cancelada o rechazada no se dejó solo en
+    la pantalla: la base también lo revisa dentro de la transacción.
+  - Se ordena por `enviado_ms, id` para que dos mensajes del mismo
+    milisegundo no cambien de lugar.
+- **Verificación:** pruebas de datos con SQLite (orden y persistencia al
+  reabrir, una conversación por reserva, vacío y largo máximo, reservas
+  cerradas, reserva inexistente), pruebas de widget (abrir desde la reserva y
+  enviar, vista del anfitrión, el borrador se queda si falla, solo lectura,
+  reintentar), `flutter analyze` y CI en verde.
+
 ## 2026-11-02 · @gio-ld · Sprint 3: pago simulado de la reserva y ADR-0003
 
 - **Herramienta:** Claude (asistente de código), en una sesión que coordinó
