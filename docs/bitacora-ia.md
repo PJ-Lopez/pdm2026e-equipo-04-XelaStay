@@ -57,6 +57,30 @@
   de migración v2→v3; pruebas de widget del formulario y de la pestaña;
   `flutter analyze` y CI en verde.
 
+## 2026-11-02 · @PJ-Lopez · Sprint 3: panel del anfitrión con solicitudes de reserva
+
+- **Herramienta:** Claude (asistente de código), en una sesión que coordinó
+  @gio-ld para el equipo; esta parte la revisó, probó y subió su autor.
+- **Qué se pidió:** que el anfitrión vea las solicitudes de reserva con filtro
+  (Por atender, Aceptadas, Cerradas), pueda aceptarlas o rechazarlas y marcar
+  como completada una estadía confirmada que ya empezó.
+- **Qué acepté:** `aceptar` en una sola transacción que también rechaza las
+  pendientes que se empalman (la otra mitad de las reservas concurrentes);
+  `UPDATE` condicionados para rechazar y completar; `SolicitudesPage` con
+  botones bloqueados mientras se guarda; `refrescarReservas` también refresca
+  el panel.
+- **Qué rechacé o corregí:**
+  - Se descartó dejar las otras solicitudes pendientes al aceptar una: dos
+    huéspedes podrían terminar con las mismas fechas aceptadas.
+  - Se descartó permitir "completar" cualquier reserva: solo una confirmada
+    cuya llegada ya pasó, para que la reseña venga de una estadía real.
+  - Se mostró un solo aviso al aceptar ("se rechazaron N"), en vez de dos
+    avisos seguidos.
+- **Verificación:** pruebas de datos con SQLite (aceptar y rechazar las que se
+  empalman, no aceptar fechas ocupadas, rechazar una vez, reglas de completar,
+  orden), pruebas de widget del panel (aceptar, completar, mensaje de regla),
+  `flutter analyze` y CI en verde.
+
 ## 2026-11-02 · @PJ-Lopez · Sprint 3: detalle del alojamiento y filtros en Explorar
 
 - **Herramienta:** Claude (asistente de código).

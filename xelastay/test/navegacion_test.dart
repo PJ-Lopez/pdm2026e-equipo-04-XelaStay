@@ -130,6 +130,18 @@ class _Reservas implements ReservasRepository {
 
   @override
   Future<void> cancelar(int id) async {}
+
+  @override
+  Future<List<Reserva>> todas() async => const [];
+
+  @override
+  Future<int> aceptar(int id) async => 0;
+
+  @override
+  Future<void> rechazar(int id) async {}
+
+  @override
+  Future<void> completar(int id) async {}
 }
 
 class _Listas implements ListasRepository {

@@ -39,7 +39,7 @@ void main() {
   testWidgets('si las fechas ya no están, explica y conserva el formulario', (
     tester,
   ) async {
-    final repo = _Reservas()..rechazar = true;
+    final repo = _Reservas()..fechasTomadas = true;
     await _abrir(tester, repo);
 
     await tester.ensureVisible(find.text('Enviar solicitud'));
@@ -134,11 +134,11 @@ class _InicioState extends State<_Inicio> {
 
 class _Reservas implements ReservasRepository {
   final recibidas = <SolicitudReserva>[];
-  bool rechazar = false;
+  bool fechasTomadas = false;
 
   @override
   Future<Reserva> solicitar(SolicitudReserva s) async {
-    if (rechazar) {
+    if (fechasTomadas) {
       throw const ReservaException(
         'Esas fechas ya no están disponibles. Prueba con otras.',
       );
@@ -168,4 +168,16 @@ class _Reservas implements ReservasRepository {
 
   @override
   Future<void> cancelar(int id) async {}
+
+  @override
+  Future<List<Reserva>> todas() async => const [];
+
+  @override
+  Future<int> aceptar(int id) async => 0;
+
+  @override
+  Future<void> rechazar(int id) async {}
+
+  @override
+  Future<void> completar(int id) async {}
 }

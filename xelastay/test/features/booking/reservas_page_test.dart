@@ -139,4 +139,16 @@ class ReservasFalsas implements ReservasRepository {
     canceladas.add(id);
     reservas[i] = _reserva(r.id, r.titulo, EstadoReserva.cancelada);
   }
+
+  @override
+  Future<List<Reserva>> todas() async => const [];
+
+  @override
+  Future<int> aceptar(int id) async => 0;
+
+  @override
+  Future<void> rechazar(int id) async {}
+
+  @override
+  Future<void> completar(int id) async {}
 }
