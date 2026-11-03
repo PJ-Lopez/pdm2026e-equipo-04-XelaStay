@@ -1,5 +1,29 @@
 # Bitácora de uso de IA
 
+## 2026-11-02 · @gio-ld · Sprint 3: pago simulado de la reserva y ADR-0003
+
+- **Herramienta:** Claude (asistente de código), en una sesión que coordinó
+  @gio-ld para el equipo; esta parte la revisó, probó y subió su autor.
+- **Qué se pidió:** que una reserva aceptada por el anfitrión se pueda pagar
+  eligiendo un método y que quede confirmada, con un comprobante en el
+  detalle. Que quede claro que es un pago simulado.
+- **Qué acepté:** `PagosLocalDataSource.pagar` en una sola transacción
+  (revisar estado, insertar pago, confirmar reserva); el monto calculado con
+  los datos de la base; `UNIQUE(reserva_id)` traducido a "Esta reserva ya está
+  pagada."; `PagoPage` sin campos de tarjeta y `ComprobanteCard`.
+- **Qué rechacé o corregí:**
+  - Se descartó pedir número de tarjeta "para que se vea real": una app no
+    debe recolectar datos de pago que no va a procesar. Solo se elige el
+    método y la pantalla dice que es simulado.
+  - Se descartó guardar el total que muestra la pantalla: si tuviera un dato
+    viejo, se guardaría mal. El datasource lo recalcula con lo guardado.
+  - Se evitó `Radio` con `groupValue` porque está marcado como obsoleto en
+    Flutter reciente; se usó `ListTile` con un ícono de selección.
+- **Verificación:** pruebas de datos con SQLite (paga y confirma, no paga una
+  pendiente, no paga dos veces, `CHECK` del total), pruebas de widget (elegir
+  método, pagar, error sin cerrar, comprobante), `flutter analyze` y CI en
+  verde.
+
 ## 2026-11-02 · @joshuaF14 · Sprint 3: mapa de alojamientos con OpenStreetMap y ADR-0002
 
 - **Herramienta:** Claude (asistente de código), en una sesión que coordinó

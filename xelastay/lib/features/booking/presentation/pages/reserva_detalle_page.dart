@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/formatos.dart';
+import '../../../pagos/domain/entities/pago.dart';
+import '../../../pagos/presentation/pages/pago_page.dart';
+import '../../../pagos/presentation/widgets/comprobante_card.dart';
 import '../../domain/entities/reserva.dart';
 import '../providers/reservas_providers.dart';
 import '../widgets/desglose_card.dart';
@@ -70,6 +73,11 @@ class ReservaDetallePage extends ConsumerWidget {
               precioNocheCentavos: r.precioNocheCentavos,
               desglose: r.desglose,
             ),
+            if (r.estado == EstadoReserva.confirmada ||
+                r.estado == EstadoReserva.completada) ...[
+              const SizedBox(height: 14),
+              ComprobanteCard(reservaId: r.id),
+            ],
             const SizedBox(height: 18),
             ..._acciones(context, ref, r),
           ],
@@ -80,6 +88,14 @@ class ReservaDetallePage extends ConsumerWidget {
 
   /// Lo que la persona puede hacer según el estado de la reserva.
   List<Widget> _acciones(BuildContext context, WidgetRef ref, Reserva r) => [
+    if (r.estado == EstadoReserva.aceptada) ...[
+      FilledButton.icon(
+        onPressed: () => _pagar(context, r),
+        icon: const Icon(Icons.lock_outline),
+        label: const Text('Pagar y confirmar'),
+      ),
+      const SizedBox(height: 10),
+    ],
     if (r.estado.cancelable)
       OutlinedButton.icon(
         onPressed: () => _cancelar(context, ref, r),
@@ -88,6 +104,20 @@ class ReservaDetallePage extends ConsumerWidget {
         label: const Text('Cancelar solicitud'),
       ),
   ];
+
+  Future<void> _pagar(BuildContext context, Reserva r) async {
+    final avisos = ScaffoldMessenger.of(context);
+    final pago = await Navigator.of(
+      context,
+    ).push<Pago>(MaterialPageRoute<Pago>(builder: (_) => PagoPage(reserva: r)));
+    if (pago != null) {
+      avisos.showSnackBar(
+        const SnackBar(
+          content: Text('Pago registrado. Tu estadía está confirmada.'),
+        ),
+      );
+    }
+  }
 
   Future<void> _cancelar(BuildContext context, WidgetRef ref, Reserva r) async {
     final avisos = ScaffoldMessenger.of(context);
