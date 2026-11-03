@@ -9,6 +9,7 @@ import '../../../listas/domain/entities/lista.dart';
 import '../../../listas/presentation/pages/listas_page.dart';
 import '../../../listas/presentation/providers/guardados_providers.dart';
 import '../../../listas/presentation/providers/listas_providers.dart';
+import '../../../resenas/presentation/widgets/resenas_del_alojamiento.dart';
 import '../../domain/entities/stay.dart';
 import '../widgets/stay_photo.dart';
 
@@ -50,7 +51,7 @@ class StayDetailPage extends ConsumerWidget {
           style: const TextStyle(color: AppColors.muted, height: 1.4),
         ),
         const SizedBox(height: 14),
-        _Calificacion(stay: stay),
+        CalificacionDelAlojamiento(stay: stay),
         const SizedBox(height: 18),
         _Verificacion(verificado: stay.isVerified),
         const SizedBox(height: 18),
@@ -59,6 +60,8 @@ class StayDetailPage extends ConsumerWidget {
           texto: 'Hasta ${stay.capacity} huéspedes',
         ),
         _Dato(icono: Icons.home_outlined, texto: stay.propertyType),
+        const SizedBox(height: 18),
+        ResenasDelAlojamiento(stay: stay),
       ],
     ),
     bottomNavigationBar: SafeArea(
@@ -177,38 +180,6 @@ class StayDetailPage extends ConsumerWidget {
 String precioPorNoche(Stay stay) =>
     '${stay.currency == 'GTQ' ? 'Q' : stay.currency} '
     '${stay.priceInCurrency.toStringAsFixed(0)}';
-
-class _Calificacion extends StatelessWidget {
-  const _Calificacion({required this.stay});
-
-  final Stay stay;
-
-  @override
-  Widget build(BuildContext context) {
-    // Sin reseñas no se inventa un promedio.
-    if (stay.ratingCount == 0) {
-      return const Text(
-        'Aún sin reseñas',
-        style: TextStyle(color: AppColors.muted),
-      );
-    }
-    final n = stay.ratingCount;
-    return Row(
-      children: [
-        const Icon(Icons.star_rounded, color: Color(0xFFE8A638), size: 20),
-        const SizedBox(width: 4),
-        Text(
-          '${stay.ratingAverage.toStringAsFixed(1)} · '
-          '${n == 1 ? '1 reseña' : '$n reseñas'}',
-          style: const TextStyle(
-            color: AppColors.ink,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    );
-  }
-}
 
 class _Verificacion extends StatelessWidget {
   const _Verificacion({required this.verificado});

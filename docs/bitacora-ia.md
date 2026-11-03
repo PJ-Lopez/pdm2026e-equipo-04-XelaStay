@@ -24,6 +24,34 @@
   método, pagar, error sin cerrar, comprobante), `flutter analyze` y CI en
   verde.
 
+## 2026-11-02 · @Emersonx257 · Sprint 3: reseñas de estadías completadas
+
+- **Herramienta:** Claude (asistente de código), en una sesión que coordinó
+  @gio-ld para el equipo; esta parte la revisó, probó y subió su autor.
+- **Qué se pidió:** que el huésped pueda reseñar (1 a 5 estrellas y un
+  comentario opcional) una estadía que ya se completó, y que el detalle del
+  alojamiento muestre esas reseñas y su promedio.
+- **Qué acepté:** la tabla `resenas` que ya traía la migración v3;
+  `ResenasLocalDataSource.publicar` en una transacción que revisa que la
+  reserva esté completada y sin reseña; el alojamiento y el autor tomados de
+  la reserva; `Calificacion.combinar` como lógica pura; `ResenaPage`,
+  `AccionResena` en el detalle de la reserva y las reseñas en el detalle del
+  alojamiento con la marca "Estadía verificada".
+- **Qué rechacé o corregí:**
+  - Se descartó dejar reseñar cualquier alojamiento desde su detalle: se
+    podría opinar sin haber ido. Solo se reseña desde una reserva completada.
+  - Se descartó escribir el nombre del autor en el formulario: sale de la
+    reserva, para que nadie firme con otro nombre.
+  - Se descartó promediar "promedio del catálogo + promedio local" como si
+    fueran dos datos iguales: 12 reseñas del catálogo pesan 12 veces.
+  - Se quitó `ReviewsPage` de ejemplo (datos fijos y sin conectar a ninguna
+    pantalla) para no dejar código muerto junto a las reseñas reales.
+- **Verificación:** pruebas de lógica (`Calificacion.combinar`), pruebas de
+  datos con SQLite (solo completadas, una por reserva, `UNIQUE` y `CHECK` de
+  estrellas en la base, orden y persistencia al reabrir), pruebas de widget
+  (reseñar desde la reserva, error sin cerrar, promedio y lista en el
+  alojamiento, reintentar), `flutter analyze` y CI en verde.
+
 ## 2026-11-02 · @joshuaF14 · Sprint 3: mapa de alojamientos con OpenStreetMap y ADR-0002
 
 - **Herramienta:** Claude (asistente de código), en una sesión que coordinó

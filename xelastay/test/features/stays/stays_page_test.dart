@@ -4,12 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:xelastay/features/auth/domain/entities/app_user.dart';
+import 'package:xelastay/features/resenas/presentation/providers/resenas_providers.dart';
 import 'package:xelastay/features/stays/data/repositories/simulated_stays_repository.dart';
 import 'package:xelastay/features/stays/domain/entities/stay.dart';
 import 'package:xelastay/features/stays/domain/repositories/stays_repository.dart';
 import 'package:xelastay/features/stays/domain/usecases/get_public_stays.dart';
 import 'package:xelastay/features/stays/presentation/pages/stay_detail_page.dart';
 import 'package:xelastay/features/stays/presentation/pages/stays_page.dart';
+
+import '../resenas/resenas_en_memoria.dart';
 
 void main() {
   testWidgets('Muestra spinner con texto y luego los alojamientos', (
@@ -190,7 +193,11 @@ Future<void> _pumpPage(WidgetTester tester, StaysRepository repository) async {
   addTearDown(tester.view.resetDevicePixelRatio);
   await tester.pumpWidget(
     // ProviderScope: el detalle (que se abre al tocar una tarjeta) lo necesita.
+    // Sus reseñas vienen de memoria para no abrir SQLite.
     ProviderScope(
+      overrides: [
+        resenasRepositoryProvider.overrideWithValue(ResenasEnMemoria()),
+      ],
       child: MaterialApp(
         home: StaysPage(
           user: const AppUser(
