@@ -9,8 +9,11 @@ import 'package:xelastay/features/listas/domain/repositories/guardados_repositor
 import 'package:xelastay/features/listas/domain/repositories/listas_repository.dart';
 import 'package:xelastay/features/listas/presentation/providers/guardados_providers.dart';
 import 'package:xelastay/features/listas/presentation/providers/listas_providers.dart';
+import 'package:xelastay/features/resenas/presentation/providers/resenas_providers.dart';
 import 'package:xelastay/features/stays/domain/entities/stay.dart';
 import 'package:xelastay/features/stays/presentation/pages/stay_detail_page.dart';
+
+import '../resenas/resenas_en_memoria.dart';
 
 void main() {
   testWidgets('muestra el alojamiento y explica la verificación', (
@@ -110,6 +113,7 @@ Future<void> _abrir(WidgetTester tester, _GuardadosFalsos guardados) async {
       overrides: [
         listasRepositoryProvider.overrideWithValue(_ListasFalsas()),
         guardadosRepositoryProvider.overrideWithValue(guardados),
+        resenasRepositoryProvider.overrideWithValue(ResenasEnMemoria()),
       ],
       child: MaterialApp(
         theme: buildAppTheme(),

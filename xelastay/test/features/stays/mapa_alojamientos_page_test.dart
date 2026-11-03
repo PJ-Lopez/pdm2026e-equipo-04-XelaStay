@@ -3,9 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:xelastay/core/theme/app_theme.dart';
 import 'package:xelastay/features/auth/domain/entities/app_user.dart';
+import 'package:xelastay/features/resenas/presentation/providers/resenas_providers.dart';
 import 'package:xelastay/features/stays/domain/entities/stay.dart';
 import 'package:xelastay/features/stays/presentation/pages/mapa_alojamientos_page.dart';
 import 'package:xelastay/features/stays/presentation/pages/stay_detail_page.dart';
+
+import '../resenas/resenas_en_memoria.dart';
 
 void main() {
   testWidgets('un pin por alojamiento; al tocarlo se ve su tarjeta', (
@@ -52,6 +55,10 @@ Future<void> _abrir(WidgetTester tester, List<Stay> stays) async {
   addTearDown(tester.view.resetDevicePixelRatio);
   await tester.pumpWidget(
     ProviderScope(
+      // "Ver detalle" abre el alojamiento; sus reseñas vienen de memoria.
+      overrides: [
+        resenasRepositoryProvider.overrideWithValue(ResenasEnMemoria()),
+      ],
       child: MaterialApp(
         theme: buildAppTheme(),
         home: MapaAlojamientosPage(

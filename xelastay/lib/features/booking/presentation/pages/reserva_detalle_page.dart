@@ -6,6 +6,7 @@ import '../../../../core/utils/formatos.dart';
 import '../../../pagos/domain/entities/pago.dart';
 import '../../../pagos/presentation/pages/pago_page.dart';
 import '../../../pagos/presentation/widgets/comprobante_card.dart';
+import '../../../resenas/presentation/widgets/accion_resena.dart';
 import '../../domain/entities/reserva.dart';
 import '../providers/reservas_providers.dart';
 import '../widgets/desglose_card.dart';
@@ -96,6 +97,7 @@ class ReservaDetallePage extends ConsumerWidget {
       ),
       const SizedBox(height: 10),
     ],
+    if (r.estado == EstadoReserva.completada) AccionResena(reserva: r),
     if (r.estado.cancelable)
       OutlinedButton.icon(
         onPressed: () => _cancelar(context, ref, r),
