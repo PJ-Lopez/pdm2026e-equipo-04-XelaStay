@@ -24,9 +24,16 @@ final reservaPorIdProvider = FutureProvider.family<Reserva, int>(
   retry: (_, _) => null,
 );
 
-/// Después de cualquier cambio en una reserva: Reservas y su detalle se
-/// vuelven a leer de la base, no se cambian a mano.
+/// Panel del anfitrión: todas las solicitudes guardadas en el teléfono.
+final solicitudesProvider = FutureProvider<List<Reserva>>(
+  (ref) => ref.watch(reservasRepositoryProvider).todas(),
+  retry: (_, _) => null,
+);
+
+/// Después de cualquier cambio en una reserva: Reservas, su detalle y el panel
+/// del anfitrión se vuelven a leer de la base, no se cambian a mano.
 void refrescarReservas(WidgetRef ref) {
   ref.invalidate(reservasDelHuespedProvider);
   ref.invalidate(reservaPorIdProvider);
+  ref.invalidate(solicitudesProvider);
 }

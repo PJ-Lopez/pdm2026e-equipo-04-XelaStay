@@ -4,6 +4,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../auth/domain/entities/app_user.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../auth/presentation/widgets/volcano_mark.dart';
+import 'solicitudes_page.dart';
 
 class HostDashboardPage extends StatelessWidget {
   const HostDashboardPage({
@@ -94,13 +95,23 @@ class HostDashboardPage extends StatelessWidget {
               ),
             ],
             const SizedBox(height: 20),
-            if (isHost)
+            if (isHost) ...[
               FilledButton.icon(
                 onPressed: () => createStay(context),
                 icon: const Icon(Icons.add_home_outlined),
                 label: const Text('Registrar alojamiento'),
-              )
-            else
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: () => Navigator.of(context).push<void>(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const SolicitudesPage(),
+                  ),
+                ),
+                icon: const Icon(Icons.inbox_outlined),
+                label: const Text('Solicitudes de reserva'),
+              ),
+            ] else
               FilledButton(
                 onPressed: authController.isLoading
                     ? null

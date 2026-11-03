@@ -105,6 +105,93 @@ class ReservasLocalDataSource {
     }
   }
 
+  /// Las más próximas primero.
+  Future<List<Reserva>> todas() async {
+    final db = await _database.database;
+    final filas = await db.query('reservas', orderBy: 'entrada, id');
+    return [for (final f in filas) desdeFila(f)];
+  }
+
+  /// Aceptar es la otra mitad de las reservas concurrentes: en UNA
+  /// transacción se acepta esta solicitud y se rechazan las pendientes que se
+  /// empalman, para que no queden dos estadías en las mismas fechas.
+  Future<int> aceptar(int id) async {
+    final db = await _database.database;
+    return db.transaction((txn) async {
+      final filas = await txn.query(
+        'reservas',
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+      if (filas.isEmpty) {
+        throw const ReservaException('Esa solicitud ya no existe.');
+      }
+      final r = filas.single;
+      if (r['estado'] != EstadoReserva.pendiente.name) {
+        throw const ReservaException('Esta solicitud ya fue atendida.');
+      }
+      final ocupadas = Sqflite.firstIntValue(
+        await txn.rawQuery(
+          '''
+          SELECT COUNT(*) FROM reservas
+          WHERE stay_id = ? AND id <> ? AND estado IN ('aceptada', 'confirmada')
+            AND entrada < ? AND salida > ?
+          ''',
+          [r['stay_id'], id, r['salida'], r['entrada']],
+        ),
+      )!;
+      if (ocupadas > 0) {
+        throw const ReservaException(
+          'Ya aceptaste otra reserva en esas fechas.',
+        );
+      }
+      await txn.update(
+        'reservas',
+        {'estado': EstadoReserva.aceptada.name},
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+      // Las demás solicitudes de esas fechas quedan rechazadas.
+      return txn.update(
+        'reservas',
+        {'estado': EstadoReserva.rechazada.name},
+        where:
+            "stay_id = ? AND id <> ? AND estado = 'pendiente' "
+            'AND entrada < ? AND salida > ?',
+        whereArgs: [r['stay_id'], id, r['salida'], r['entrada']],
+      );
+    });
+  }
+
+  Future<void> rechazar(int id) async {
+    final db = await _database.database;
+    final cambiadas = await db.update(
+      'reservas',
+      {'estado': EstadoReserva.rechazada.name},
+      where: "id = ? AND estado = 'pendiente'",
+      whereArgs: [id],
+    );
+    if (cambiadas == 0) {
+      throw const ReservaException('Esta solicitud ya fue atendida.');
+    }
+  }
+
+  /// Solo una estadía confirmada cuya llegada ya pasó (o es hoy).
+  Future<void> completar(int id, DateTime hoy) async {
+    final db = await _database.database;
+    final cambiadas = await db.update(
+      'reservas',
+      {'estado': EstadoReserva.completada.name},
+      where: "id = ? AND estado = 'confirmada' AND entrada <= ?",
+      whereArgs: [id, fechaIso(hoy)],
+    );
+    if (cambiadas == 0) {
+      throw const ReservaException(
+        'Solo se completa una estadía confirmada que ya empezó.',
+      );
+    }
+  }
+
   static Reserva desdeFila(Map<String, Object?> f) => Reserva(
     id: f['id']! as int,
     stayId: f['stay_id']! as String,

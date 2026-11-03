@@ -42,4 +42,16 @@ class ReservasRepositoryImpl implements ReservasRepository {
 
   @override
   Future<void> cancelar(int id) => _local.cancelar(id);
+
+  @override
+  Future<List<Reserva>> todas() => _local.todas();
+
+  @override
+  Future<int> aceptar(int id) => _local.aceptar(id);
+
+  @override
+  Future<void> rechazar(int id) => _local.rechazar(id);
+
+  @override
+  Future<void> completar(int id) => _local.completar(id, _reloj());
 }
