@@ -1,5 +1,30 @@
 # Bitácora de uso de IA
 
+## 2026-11-04 · @gio-ld · Documentación: README, limitaciones y ajustes de la bitácora
+
+- **Herramienta:** Claude (asistente de código), en la sesión que coordinó
+  @gio-ld para el equipo; esta parte la revisó y subió su autor.
+- **Qué se pidió:** un README que explique el problema y el usuario, cómo
+  correr el API y la app, el flujo de la demo, las pruebas, la arquitectura,
+  las decisiones y las limitaciones, con capturas reales de la app.
+- **Qué acepté:** el README nuevo, con una sección de limitaciones conocidas,
+  y mover la tabla de roles por semana a `docs/roles-semanales.md`.
+- **Qué rechacé o corregí:**
+  - El README anterior describía colas con RabbitMQ o Kafka y un chat en
+    tiempo real que la app no tiene. Se quitó: el README solo cuenta lo que
+    está en `main`.
+  - Se descartó esconder lo que falta. En lugar de eso, "Limitaciones
+    conocidas" dice lo que la app todavía no hace (panel de administrador,
+    editar alojamientos, datos por cuenta) y los textos del API con acentos
+    rotos.
+  - En la entrada de la parte A decía "la app fallaba" por usar `ref`
+    después de un `await`. Fue una precaución, no un fallo que haya pasado:
+    se corrigió a "podría fallar".
+  - La entrada de S16 parte 4 decía que se probó en emulador, pero ese día no
+    había uno disponible (lo dice también la entrada de Codex). Se corrigió.
+- **Verificación:** se revisó cada afirmación del README contra el código de
+  `main`, y las capturas salen de la app corriendo en el emulador.
+
 ## 2026-11-02 · @gio-ld · Sprint 3: chat entre huésped y anfitrión
 
 - **Herramienta:** Claude (asistente de código), en una sesión que coordinó
@@ -175,8 +200,8 @@
   - Filtrar dentro de `build` con condiciones sueltas: se movió a
     `FiltrosCatalogo` para probar las reglas con pruebas de lógica.
   - Mostrar "0.0" cuando no hay reseñas: se cambió por "Aún sin reseñas".
-  - Usar `ref` después del `await` sin revisar `context.mounted`: si el
-    usuario sale antes de que termine el guardado, la app fallaba.
+  - Se descartó usar `ref` después del `await` sin revisar `context.mounted`:
+    si el usuario sale antes de que termine el guardado, podría fallar.
 - **Verificación:** pruebas de lógica de filtros, pruebas de widget (chips,
   "Quitar filtros", tocar tarjeta abre el detalle, guardar en lista y error al
   guardar), `flutter analyze` y CI en verde.
@@ -246,8 +271,9 @@
     `main.dart` lo sobreescribe con el API.
 - **Verificación:** pruebas de reglas con SQLite real (en uso no se borra,
   archivar sobrevive a cerrar y abrir), pruebas de widget del formulario y del
-  detalle, `flutter test` local y CI en verde; prueba manual en emulador
-  (borrar una lista con alojamientos, archivarla, cerrar y abrir la app).
+  detalle, `flutter test` local y CI en verde. La prueba manual en emulador
+  (borrar una lista con alojamientos, archivarla, cerrar y abrir la app)
+  quedó pendiente al cerrar S16: no había emulador disponible.
 
 ## 2026-11-01 · @gio-ld · S16 parte 3: CRUD de listas de viaje
 

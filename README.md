@@ -1,101 +1,131 @@
-# pdm2026e-equipo-04-xelastay
 # XelaStay 🏡📍
 
-> Plataforma móvil construida en Flutter para la exploración, reserva y contacto directo de alojamientos con ubicaciones físicas reales en Quetzaltenango, respaldada por un sistema de resolución de reservas concurrentes mediante colas asíncronas.
+App Android en Flutter para encontrar, reservar y pagar alojamiento en Quetzaltenango, con ubicación verificada en el mapa, chat con el anfitrión y reseñas de huéspedes que de verdad se hospedaron.
+
+> Proyecto del curso Programación de Dispositivos Móviles · UMES Quetzaltenango · Sección E · Equipo 4
 
 ---
 
-## 1. Problema Observable
-Las personas que buscan alojamiento o alquiler en Quetzaltenango se enfrentan a anuncios sin validación física en mapas reales, reseñas poco confiables y el riesgo constante de sobreventa o cancelaciones de última hora cuando dos o más personas intentan reservar el mismo espacio simultáneamente.
+## El problema y el usuario
 
----
+**Usuario:** quien llega a Xela por unos días o unos meses (estudiantes de otros departamentos, viajeros, gente que viene por trabajo) y busca dónde quedarse. Del otro lado, el **anfitrión local** que renta un cuarto, un apartamento o una casa.
 
-## 2. Alcance del MVP (Milestone M1: Arquitectura y Datos)
-1. **Exploración Geográfica y Catálogo:** Visualización de alojamientos mediante mapa interactivo con pines y lista de tarjetas con referencias físicas verificadas.
-2. **Detalle de Alojamiento y Reseñas:** Vista con especificaciones del lugar, calificación promedio, comentarios de huéspedes previos y acción de reserva.
-3. **Gestión de Reservas y Chat:** Flujo de solicitud para apartar lugar (preparado para resolución asíncrona de colas) y canal de chat bidireccional entre huésped y anfitrión.
+**Problema:** hoy ese alojamiento se busca en anuncios sueltos, sin ubicación verificada en un mapa. No se sabe si la dirección es real, las reseñas no se pueden comprobar y apartar un lugar es una cadena de mensajes: dos personas pueden creer que tienen las mismas fechas, y no queda constancia de lo que se pagó.
 
----
+**Qué hace XelaStay:**
 
-## 3. Integrantes del Equipo
+- Catálogo con **filtros** (verificados, hasta Q 300, para 3 o más) y **mapa** con la ubicación de cada lugar; los que la tienen revisada lo dicen.
+- **Reservas que no se empalman:** al pedir y al aceptar se revisan las fechas dentro de una transacción.
+- **Pago con comprobante** (simulado en esta versión, ver ADR-0003).
+- **Chat por reserva** entre huésped y anfitrión.
+- **Reseñas solo de estadías completadas**, marcadas como *Estadía verificada*.
+- **Listas de viaje** para guardar alojamientos y decidir después.
 
-* **Emerson Basilio Tahay Menchú** — Carnet: `202308012` — [@Emersonx257](https://github.com/Emersonx257)
-* **Pedro Javier López López** — Carnet: `202308038` — [@PJ-Lopez](https://github.com/PJ-Lopez)
-* **Joshua David Flores Morales** — Carnet: `202308056` — [@joshuaF14](https://github.com/joshuaF14)
-* **Giovanni Fernando de León Coyoy** — Carnet: `202308088` — [@gio-ld](https://github.com/gio-ld)
+## Capturas
 
----
+| Explorar con filtros | Detalle | Mapa |
+|---|---|---|
+| ![Explorar](docs/capturas/explorar.png) | ![Detalle](docs/capturas/detalle.png) | ![Mapa](docs/capturas/mapa.png) |
+| **Mis reservas** | **Pago y comprobante** | **Solicitudes del anfitrión** |
+| ![Reservas](docs/capturas/reservas.png) | ![Pago](docs/capturas/pago.png) | ![Solicitudes](docs/capturas/solicitudes.png) |
+| **Chat** | **Reseña** | **Listas de viaje** |
+| ![Chat](docs/capturas/chat.png) | ![Reseña](docs/capturas/resena.png) | ![Listas](docs/capturas/listas.png) |
 
-## 4. Historial y Matriz de Roles Semanales
+## Cómo correr la app
 
-De acuerdo con la metodología del curso, los roles rotan periódicamente para garantizar la participación equitativa en la toma de decisiones, arquitectura, desarrollo y calidad:
+**Requisitos:** Flutter 3.47 (la misma versión del CI), Android Studio con un emulador Android y Docker para el API.
 
-### Semana 1 (Laboratorio S08 — Definición, Setup y Backlog M1)
-| Integrante | Rol Semana 1 | Responsabilidad Desempeñada |
-| :--- | :--- | :--- |
-| `@PJ-Lopez` | **Arquitectura** | Creación y configuración inicial del repositorio, ramas base y `.gitignore`. |
-| `@Emersonx257` | **Producto / PM** | Delimitación del alcance del MVP y redacción de criterios de aceptación iniciales. |
-| `@joshuaF14` | **UX / Investigación** | Mapeo del flujo principal de navegación y análisis de interacción del usuario. |
-| `@gio-ld` | **QA / Release** | Configuración de reglas de protección en `main`, revisión del primer Pull Request y merge. |
+> La app es para **Android**. No funciona en Chrome: la base local (sqflite) no corre en Web.
 
-### Semana 2 (Semana Actual — Implementación M1: Arquitectura y Modelos)
-| Integrante | Rol Semana 2 | Responsabilidad y Entregables |
-| :--- | :--- | :--- |
-| `@PJ-Lopez` | **Producto / PM** | Priorización de backlog en M1, auditoría de criterios de aceptación y alineación con backend comercial. |
-| `@joshuaF14` | **Arquitectura** | Estructuración de Clean Architecture y creación de modelos de datos Dart (`Stay`, `BookingRequest`, `Review`, `ChatMessage`). |
-| `@gio-ld` | **UX / Investigación** | Maquetación de vistas de exploración (mapa/lista), detalle de estancia y catálogo de ubicaciones. |
-| `@Emersonx257` | **QA / Release** | Revisión de Pull Requests, validación de criterios en ramas `issue-*` y control de merges hacia `main`. |
+**1. Levantar el API** (`xela-stayAPI`, en su propio repositorio). Da el inicio de sesión, el catálogo y el registro de alojamientos. Se levanta con Docker siguiendo su README: el API queda en el puerto 3000, con MySQL. **Todo el equipo debe usar la misma versión del API** (`git pull` en su carpeta antes de probar).
 
----
+Para comprobarlo, abre `http://localhost:3000/api/v1/stays` en el navegador: debe mostrar los alojamientos.
 
-## 5. Arquitectura de Software: Clean Architecture
+**2. Correr la app** en el emulador:
 
-El proyecto organiza su código fuente bajo una estructura modular en capas para desacoplar las reglas de negocio de la interfaz gráfica y de las fuentes de datos externas:
-
-```text
-lib/
-├── main.dart                          # Punto de arranque de la aplicación
-│
-├── core/                              # Recursos comunes compartidos
-│   ├── theme/                         # Paleta de colores, tipografía y ThemeData
-│   ├── network/                       # Configuración HTTP y clientes de mensajería/colas
-│   └── utils/                         # Formateadores de moneda (Q) y helpers
-│
-└── features/                          # Módulos por capacidad funcional
-    ├── auth/                           # Registro, login, sesión y acceso por roles
-    │   ├── domain/                    # Usuario, contratos y casos de uso
-    │   ├── data/                      # API de identidad y token en almacenamiento seguro
-    │   └── presentation/              # Formularios de acceso y estado de autenticación
-    │
-    ├── hosts/                          # Activación de anfitrión y registro de alojamientos
-    │   ├── domain/                    # Entidades, repositorio y casos de uso
-    │   ├── data/                      # Adaptadores para endpoints de anfitrión
-    │   └── presentation/              # Panel y formulario de alojamiento
-    │
-    ├── stays/                         # Módulo de exploración y catálogo de lugares
-    │   ├── domain/                    # Entidades puras (Stay, Location, Review) y contratos
-    │   ├── data/                      # Modelos con serialización y fuentes de datos
-    │   └── presentation/              # Páginas (ExploraPage, DetallePage) y widgets
-    │
-    ├── booking/                       # Módulo de solicitud y resolución de reservas
-    │   ├── domain/                    # Entidad BookingRequest y lógica de estados
-    │   ├── data/                      # Repositorios y conexión a endpoints / colas
-    │   └── presentation/              # Páginas de confirmación y estado de reserva
-    │
-    └── chat/                          # Módulo de mensajería huésped-anfitrión
-        ├── domain/                    # Entidad ChatMessage y contratos
-        ├── data/                      # Datasources en tiempo real
-        └── presentation/              # ChatPage y componentes de conversación
+```bash
+cd xelastay
+flutter pub get
+flutter run
 ```
 
----
+El emulador llega al API de la computadora por `http://10.0.2.2:3000/api/v1`. En un teléfono físico, usa la IP de la computadora en la red:
 
-## 6. Regla de Trabajo y Flujo Git
+```bash
+flutter run --dart-define=API_BASE_URL=http://IP-DE-LA-PC:3000/api/v1
+```
 
-> ⚠️ **Regla estricta:** Nadie hace push directo a `main`. Todo cambio en el proyecto debe pasar por revisión antes de integrarse.
+**3. Recorrer el flujo completo.** Las reservas, el pago, el chat y las reseñas se guardan en el teléfono (ADR-0001), así que en la demo la misma persona hace de huésped y de anfitrión:
 
-El ciclo de desarrollo obligatorio es:
+1. Crear cuenta → Explorar → elegir un alojamiento → *Solicitar reserva* con **llegada hoy**.
+2. Reservas → la reserva → ícono de chat → escribir al anfitrión.
+3. Perfil → *Conocer modo anfitrión* → *Quiero ser anfitrión* → *Solicitudes de reserva* → **Aceptar** (y contestar el chat).
+4. Reservas → *Pagar y confirmar* → elegir método → comprobante.
+5. Solicitudes → Aceptadas → **Marcar estadía completada**.
+6. Reservas → **Escribir reseña** → el alojamiento la muestra con *Estadía verificada*.
+
+## Pruebas y calidad
+
+```bash
+cd xelastay
+dart format --output=none --set-exit-if-changed lib test
+flutter analyze
+flutter test
+```
+
+- **Lógica:** filtros del catálogo, desglose del precio, centro del mapa, promedio de calificaciones.
+- **Datos (SQLite real):** migraciones v1 → v2 → v3 con datos, reservas que se empalman, aceptar y rechazar en una transacción, pago único por reserva, chat y reseñas.
+- **Pantallas:** cada pantalla con cargando, vacío y error con *Reintentar*, usando repositorios falsos.
+
+El **CI** (GitHub Actions) corre formato, análisis y pruebas en cada PR y en `main`, y compila un APK de prueba. `main` está protegida: todo entra por PR revisado por otra persona.
+
+## Arquitectura
+
+Cada función vive en `xelastay/lib/features/<función>/` con tres capas, y las dependencias van hacia adentro:
 
 ```text
-[Issue asignado en M1] ──> [Rama local: issue-<#>-descripcion] ──> [Pull Request con 'Closes #<#>'] ──> [Revisión y Aprobación QA] ──> [Merge a main]
+presentation/  pantallas y providers (Riverpod)  → solo llaman al repositorio
+domain/        entidades, reglas y contratos      → Dart puro, sin Flutter ni SQL
+data/          datasources (SQL o HTTP) y la implementación del repositorio
 ```
+
+La pantalla nunca habla con la base: `pantalla → provider → repositorio → datasource → SQLite / API`. Funciones: `auth`, `stays` (catálogo, detalle, mapa), `listas`, `booking` (reservas), `pagos`, `hosts` (anfitrión), `chat` y `resenas`.
+
+**Dónde se guardan los datos:**
+
+- **API (Docker):** cuentas, sesión, catálogo de alojamientos y registro de alojamientos del anfitrión.
+- **SQLite en el teléfono** (`xelastay.db`), con migraciones numeradas y probadas: v1 guardados · v2 listas de viaje · v3 reservas, pagos, mensajes y reseñas.
+
+## Limitaciones conocidas
+
+- **Datos en el teléfono, no en la cuenta** (ADR-0001). Reservas, pagos, chat y reseñas viven en el teléfono: el chat no llega a otro dispositivo, y en la demo la misma persona hace de huésped y de anfitrión. Las listas de viaje las comparten las cuentas que entren en el mismo teléfono.
+- **No hay panel de administrador.** El rol admin ve lo mismo que un anfitrión. Los alojamientos que crea un anfitrión quedan pendientes de verificación y no hay pantalla para aprobarlos.
+- **El anfitrión crea alojamientos, pero no los edita** desde la app.
+- **El pago es simulado** (ADR-0003): no se cobra ni se piden datos de tarjeta.
+- **Textos del API:** algunas palabras con acento se ven mal ("HistÃ³rico") porque el API no indica `charset=utf-8`, y el tipo de alojamiento aparece como lo manda el API ("apartment", "house").
+
+## Decisiones (ADR)
+
+- [ADR-0001](docs/adr/0001-reservas-en-sqlite-local.md) · Reservas, pagos, chat y reseñas en SQLite local.
+- [ADR-0002](docs/adr/0002-mapa-con-openstreetmap.md) · Mapa con OpenStreetMap, sin llave de Google.
+- [ADR-0003](docs/adr/0003-pago-simulado.md) · Pago simulado, sin pedir datos de tarjeta.
+
+## Pruebas con usuarios
+
+Qué intentaron las personas que probaron la app, qué falló y qué PR lo arregló: [docs/usuarios.md](docs/usuarios.md).
+
+## Forma de trabajo
+
+1. Cada tarea es un **issue** asignado.
+2. Rama desde `main`: `feat/<#issue>-descripcion`.
+3. **PR** con `Closes #<issue>`, el CI en verde y la **revisión de otra persona**.
+4. Merge a `main`. Nadie hace push directo a `main`.
+
+El uso de IA de cada PR queda en la [bitácora de IA](docs/bitacora-ia.md). Los roles de cada semana están en [docs/roles-semanales.md](docs/roles-semanales.md).
+
+## Equipo
+
+- **Emerson Basilio Tahay Menchú** — `202308012` — [@Emersonx257](https://github.com/Emersonx257)
+- **Pedro Javier López López** — `202308038` — [@PJ-Lopez](https://github.com/PJ-Lopez)
+- **Joshua David Flores Morales** — `202308056` — [@joshuaF14](https://github.com/joshuaF14)
+- **Giovanni Fernando de León Coyoy** — `202308088` — [@gio-ld](https://github.com/gio-ld)
